@@ -1,1 +1,2 @@
-compile.opam_packages=graphics
+compile.opam_packages=graphics,async
+compile.thread=true
