@@ -42,14 +42,31 @@ let update () = (**need to know when we hit stage, probably hardcoded coordinate
   let (a,b,c,d) = !lastmove in
   lastmove := (a,b-1,c,d-1)
 
-let process_attack (a: attack) (i: int) : unit = failwith "TODO"
-(*let process_attack (a: attack) (i: int) : unit =
+let collide (r1: rect) (r2: rect) : bool =
+  let r1p1 = fst r1 in
+  let r1p2 = snd r1 in
+  let r2p1 = fst r2 in
+  let r2p2 = snd r2 in
+  if
+
+let process_attack (a: attack) (i: int) : unit =
   match a with
   | Left ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
-      (let hit = ((fst (fst characters).hitbox) - range,
-  | Right ->
+      let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x - (fst characters).range;y=p1.y} in
+      let newp2 = {x=p1.x;y=p2.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+        ()
+      else
+        ()
+    else
+      ()
+  | _ -> ()
+  (*| Right ->
   | Up ->
   | Down ->
   | Neutral -> *)
@@ -100,8 +117,7 @@ let process_move (m: move) (i: int) : unit = (**consider stuns*)
       (let newv = {x=(snd characters).velocity.x;y=(snd characters).speed * jumpconstant} in
       change_velocity (snd characters) newv ;
       let (a,b,c,d) = !lastmove in
-      lastmove := (a,b,MUp,12)) in
-    update ()
+      lastmove := (a,b,MUp,12))
 
 
 let rec tickprocessor () =
@@ -113,11 +129,9 @@ let rec tickprocessor () =
      | 'w' -> process_move MUp 0
      | 's' -> process_move MDown 0
      | 'd' -> process_move MRight 0
-     | _ -> update () in
-   let _ = if !newinputs = [] then
-      ignore(Thread.create update ())
-    else
-      ignore(Thread.create (List.iter process) !newinputs) in
+     | _ -> () in
+   let _ =
+      ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
    newinputs := [] ;
    Thread.delay 0.017 ;
    tickprocessor ()
