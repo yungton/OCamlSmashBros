@@ -100,8 +100,7 @@ let process_move (m: move) (i: int) : unit = (**consider stuns*)
       (let newv = {x=(snd characters).velocity.x;y=(snd characters).speed * jumpconstant} in
       change_velocity (snd characters) newv ;
       let (a,b,c,d) = !lastmove in
-      lastmove := (a,b,MUp,12)) in
-    update ()
+      lastmove := (a,b,MUp,12))
 
 
 let rec tickprocessor () =
@@ -113,11 +112,9 @@ let rec tickprocessor () =
      | 'w' -> process_move MUp 0
      | 's' -> process_move MDown 0
      | 'd' -> process_move MRight 0
-     | _ -> update () in
-   let _ = if !newinputs = [] then
-      ignore(Thread.create update ())
-    else
-      ignore(Thread.create (List.iter process) !newinputs) in
+     | _ -> () in
+   let _ =
+      ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
    newinputs := [] ;
    Thread.delay 0.017 ;
    tickprocessor ()
