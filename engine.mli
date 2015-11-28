@@ -5,7 +5,7 @@ type move
 (**
  * character is a list of characters in the current game.
  *)
-val character : Character.t list
+val characters : Character.t * Character.t
 
 (**
  * [input_loop ()] is a recursive loop that processes inputs continuously.
