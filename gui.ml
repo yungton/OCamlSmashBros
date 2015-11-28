@@ -31,7 +31,7 @@ let draw_stage_base () =
   set_color black;
   fill_rect stage_inset 0 (size_x()-2*stage_inset-1) 100
 
-let draw_stage () = fill_rect stage_inset 100 (size_x()-2*stage_inset) 50
+let draw_stage () = draw_stage_top(); draw_stage_base()
 
 let draw_star () =
   let orig_col = foreground in
@@ -82,16 +82,18 @@ let draw_char col (x,y) w h =
   fill_rect x y w h;
   set_color orig_col
 
-let _ = 
-  open_graph " 1000x600"; 
-  set_window_title "OCaml Smash Bros";
+let draw() = 
   draw_background();
-  draw_stage_top();
-  draw_stage_base();
+  draw_stage();
   draw_char red (300,125) 25 75;
   draw_char blue (700,125) 25 75;
   draw_status_box 1 red (220,10) 69;
   draw_status_box 2 blue ((size_x()-320),10) 69
+
+let _ = 
+  open_graph " 1000x600"; 
+  set_window_title "OCaml Smash Bros";
+  draw()
 
 let rec loop () = loop()
 
