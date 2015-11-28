@@ -1,28 +1,33 @@
 open Async.Std
 (** A character in OCaml Smash that is of type t. *)
 
-type point
-type rect
-type attack
-type attacks
+type point = int * int
+type rect = point * point
+type attack = int * int
+type attacks = {
+  jab:    attack;
+  fsmash: attack;
+  usmash: attack;
+  dsmash: attack;
+  nspec:  attack;
+  fspec:  attack;
+  uspec:  attack;
+  dspec:  attack
+}
 
 type t = {
-  (* Constants *)
+  mutable pos:      point;
+  mutable hitbox:   rect;
+  mutable percent:  int;
+  mutable stun:     int;
+  mutable air:      bool;
+  mutable velocity: point;
+  mutable jumps:    int;
+  mutable lives:    int;
   attacks:  attacks;
   range:    int;
   speed:    int;
   weight:   int;
-
-  (* Variables *)
-  pos:      point;
-  hitbox:   rect;
-  percent:  int;
-  stun:     int;
-  air:      bool;
-  velocity: point;
-  jumps:    int;
-  lives:    int;
-  updated:  t Async.Std.Ivar.t
 }
 
 type guy = Light | Medium | Heavy
@@ -33,6 +38,11 @@ type guy = Light | Medium | Heavy
 val create : guy -> point -> t
 
 (**
+ * [moveto x p] moves the character x to point p
+ *)
+val moveto : t -> point -> unit
+
+(**
  * [attack x] simulates an attack by the character x.
  *)
 val attack : t -> unit
@@ -41,21 +51,19 @@ val attack : t -> unit
  * [stun x len] stuns updates the stun field for character x to len.
  * This means the character x becomes stunned for len seconds.
  *)
-val stun : t -> int -> t
+val stun : t -> int -> unit
 
 (**
  * [get_hit x dmg] adds dmg to the damage field of the character x.
  *)
-val get_hit : t -> int -> t
+val get_hit : t -> int -> unit
 
 (**
  * [change_velocity x vel] updates the velocity of the character x.
  *)
-val change_velocity : t -> point -> t
+val change_velocity : t -> point -> unit
 
 (**
  * [reset x] takes a life off character x.
  *)
-val reset : t -> t
-
-val updated : t -> t Deferred.t
+val reset : t -> unit
