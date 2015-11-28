@@ -1,6 +1,9 @@
 open Async.Std
 
-type point = int * int
+type point = {
+  x: int;
+  y: int
+}
 type rect = point * point
 type attack = int * int
 
@@ -38,9 +41,9 @@ let create (g:guy) (p:point) = {
   percent = 0;
   stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
   air = false;
-  velocity = (0,0);
+  velocity = {x = 0;y = 0};
   jumps = 2;
-  lives = 3; 
+  lives = 3;
 
   attacks = failwith "to discuss";
   range = failwith "to discuss";
@@ -52,9 +55,9 @@ let moveto c p = c.pos <- p
 
 let attack c = failwith "TODO"
 
-let stun c time = c.stun <- time 
+let stun c time = c.stun <- time
 
-let get_hit c dmg = c.percent <- c.percent + dmg; 
+let get_hit c dmg = c.percent <- c.percent + dmg;
                     c.jumps   <- 1
 
 let change_velocity c v = c.velocity <- v

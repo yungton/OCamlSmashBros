@@ -1,7 +1,10 @@
 open Async.Std
 (** A character in OCaml Smash that is of type t. *)
 
-type point = int * int
+type point = {
+  x: int;
+  y: int
+}
 type rect = point * point
 type attack = int * int
 type attacks = {
