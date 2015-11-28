@@ -1,5 +1,3 @@
-open Async.Std
-
 type point = {
   x: int;
   y: int
@@ -19,7 +17,6 @@ type attacks = {
 }
 
 type t = {
-  mutable pos:      point;
   mutable hitbox:   rect;
   mutable percent:  int;
   mutable stun:     int;
@@ -35,9 +32,16 @@ type t = {
 
 type guy = Light | Medium | Heavy
 
-let create (g:guy) (p:point) = {
-  pos = p;
-  hitbox = failwith "to discuss";
+let get_width c  = (fst c.hitbox).x - (snd c.hitbox).x
+
+let get_height c = (fst c.hitbox).y - (snd c.hitbox).y
+
+let hitbox_at_point c p = 
+  let width = get_width c and height = get_height c in
+  (p, { x=p.x+width; y = p.y+height })
+
+let create (g:guy) p = {
+  hitbox = (p, {x=p.x+50; y = p.y+100}); (* actual dimensions change with guy*)
   percent = 0;
   stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
   air = false;
@@ -51,16 +55,17 @@ let create (g:guy) (p:point) = {
   weight = failwith "to discuss";
 }
 
-let moveto c p = c.pos <- p
+let moveto c p = c.hitbox <- hitbox_at_point c p
+
+let set_jumps c i = c.jumps <- i
 
 let attack c = failwith "TODO"
 
 let stun c time = c.stun <- time
 
 let get_hit c dmg = c.percent <- c.percent + dmg;
-                    c.jumps   <- 1
+                    set_jumps c 1
 
 let change_velocity c v = c.velocity <- v
 
-let reset c = c.lives <- c.lives - 1;
-              c.pos   <- failwith "TODO"
+let reset c = c.lives <- c.lives - 1; (* need to change hitbox too*)

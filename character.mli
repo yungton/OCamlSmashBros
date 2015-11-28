@@ -19,7 +19,6 @@ type attacks = {
 }
 
 type t = {
-  mutable pos:      point;
   mutable hitbox:   rect;
   mutable percent:  int;
   mutable stun:     int;
@@ -55,6 +54,8 @@ val attack : t -> unit
  * This means the character x becomes stunned for len seconds.
  *)
 val stun : t -> int -> unit
+
+val set_jumps : t -> int -> unit
 
 (**
  * [get_hit x dmg] adds dmg to the damage field of the character x.
