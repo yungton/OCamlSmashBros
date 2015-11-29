@@ -35,6 +35,12 @@ type t = {
 type guy = Light | Medium | Heavy
 
 (**
+ * [get_width g] returns the width of character g
+ *)
+
+val get_width : guy -> int
+
+(**
  * [create g] creates a new character that is of type g, which is of type guy.
  *)
 val create : guy -> point -> t
