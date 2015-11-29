@@ -142,7 +142,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (snd characters) {x=(-1);y=0};
-        let perc = (snd characters).percent in
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
@@ -161,7 +160,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (fst characters) {x=(-1);y=0};
-        let perc = (fst characters).percent in
         get_hit (fst characters) 10;
         (* This stun value should be a function of dmg *)
         stun (fst characters) 3;
@@ -181,7 +179,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (snd characters) {x=1;y=0};
-        let perc = (snd characters).percent in
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
@@ -200,7 +197,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (fst characters) {x=1;y=0};
-        let perc = (fst characters).percent in
         get_hit (fst characters) 10;
         (* This stun value should be a function of dmg *)
         stun (fst characters) 3;
@@ -220,7 +216,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (snd characters) {x=0;y=1};
-        let perc = (snd characters).percent in
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
@@ -239,7 +234,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (fst characters) {x=0;y=1};
-        let perc = (fst characters).percent in
         get_hit (fst characters) 10;
         (* This stun value should be a function of dmg *)
         stun (fst characters) 3;
@@ -262,7 +256,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (snd characters) {x=0;y=(-1)};
-        let perc = (snd characters).percent in
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
@@ -281,7 +274,6 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (fst characters) {x=0;y=(-1)};
-        let perc = (fst characters).percent in
         get_hit (fst characters) 10;
         (* This stun value should be a function of dmg *)
         stun (fst characters) 3;
