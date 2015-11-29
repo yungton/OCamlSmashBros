@@ -1,6 +1,11 @@
 open Graphics
 open Character
-
+(**attacking character should be stunned on missed attack but this brings up
+   a cheating tactic, a person can keep attacking and stunning themself, thus
+   achieving a constant velocity to wherever they want to go
+   discuss with kevin shae shae
+   UP/DOWN need the on ground fixes
+   need to map inputs to call process attack in tickprocessor*)
 type attack = Left | Right | Down | Up | Neutral
 
 type move = MLeft | MRight | MDown | MUp
@@ -53,7 +58,8 @@ let stagecollision pos1 pos2 =
       ()
   else
     if topdiff1 = 0 && (leftdiff1 > 0 || rightdiff1 > 0) then
-     (fst characters).air <- true
+      (if (fst characters).stun > 0 then (fst characters).jumps <- 1 else () ;
+     (fst characters).air <- true)
      else
      ()) ;
   if topdiff2 < 0 then
@@ -74,11 +80,12 @@ let stagecollision pos1 pos2 =
       ()
   else
     if topdiff2 = 0 && (leftdiff2 > 0 || rightdiff2 > 0) then
-     (snd characters).air <- true
+      (if (snd characters).stun > 0 then (snd characters).jumps <- 1 else () ;
+     (snd characters).air <- true)
      else
      ()
 
-let update () = (**velocity changes differently when stunned*)
+let update () =
   let newpos1test = {x=(fst characters).velocity.x + (fst ((fst characters).hitbox)).x;
      y=(fst characters).velocity.y + (fst ((fst characters).hitbox)).y} in
   let newpos2test = {x=(snd characters).velocity.x + (fst ((snd characters).hitbox)).x;
@@ -90,19 +97,31 @@ let update () = (**velocity changes differently when stunned*)
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
   moveto (fst characters) newpos1 ; moveto (snd characters) newpos2 ;
   let newvy1 = if (fst characters).air then
-                 if (fst characters).velocity.y = (fst characters).speed * fallconstant then
-                   (fst characters).speed * fallconstant
-                 else
-                   max ((fst characters).velocity.y - gravity) (fst characters).speed * fallconstant/2
+                 if (fst characters).stun < 1 then
+                   if (fst characters).velocity.y = (fst characters).speed * fallconstant then
+                     (fst characters).speed * fallconstant
+                   else
+                     max ((fst characters).velocity.y - gravity) (fst characters).speed * fallconstant/2
+                 else (fst characters).velocity.y
                else 0 in
   let newvy2 = if (snd characters).air then
-                 if (snd characters).velocity.y = (snd characters).speed * fallconstant then
-                   (snd characters).speed * fallconstant
-                 else
-                  max ((snd characters).velocity.y - gravity) (snd characters).speed * fallconstant/2
+                 if (snd characters).stun < 1 then
+                   if (snd characters).velocity.y = (snd characters).speed * fallconstant then
+                     (snd characters).speed * fallconstant
+                   else
+                     max ((snd characters).velocity.y - gravity) (snd characters).speed * fallconstant/2
+                 else (snd characters).velocity.y
                else 0 in
-  change_velocity (fst characters) {x=0;y=newvy1} ;
-  change_velocity (snd characters) {x=0;y=newvy2} ;
+  let newvx1 = if (fst characters).stun > 0 then
+    ((fst characters).stun <- (fst characters).stun -1 ;
+    (fst characters).velocity.x )
+    else 0 in
+  let newvx2 = if (snd characters).stun > 0 then
+    ((snd characters).stun <- (snd characters).stun -1 ;
+    (snd characters).velocity.x )
+    else 0 in
+  change_velocity (fst characters) {x=newvx1;y=newvy1} ;
+  change_velocity (snd characters) {x=newvx2;y=newvy2} ;
   let (a,b,c,d) = !lastmove in
   lastmove := (a,b-1,c,d-1)
 
@@ -216,6 +235,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (snd characters) {x=0;y=1};
+        (fst characters).air <- true ;
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
@@ -234,6 +254,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
         (change_velocity (fst characters) {x=0;y=1};
+        (snd characters).air <- true;
         get_hit (fst characters) 10;
         (* This stun value should be a function of dmg *)
         stun (fst characters) 3;
@@ -244,7 +265,11 @@ let process_attack (a: attack) (i: int) : unit =
         ())
   (* Down needs to be fixed, right now it only works if character is in the air.
      A down attack on the ground should function differently, the area hit should be
-     a horizontal rectangle on the bottom half of the character's hitbox. *)
+     a horizontal rectangle on the bottom half of the character's hitbox.
+     BOBBY - I think you should implement this same alternate way of calculating down attacks
+     on the gound, to also up attacks on the ground. It's the same problem, right now
+     an up attack with two people on the ground would never land because the collision
+     rectangle would be above both their heads. *)
   | Down ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
@@ -284,8 +309,9 @@ let process_attack (a: attack) (i: int) : unit =
         ())
   | _ -> ()
 
-let process_move (m: move) (i: int) : unit = (**consider stuns*)
-  let _ =
+let process_move (m: move) (i: int) : unit =
+  let ch = if i = 0 then fst characters else snd characters in
+  let _ = if ch.stun > 0 then () else
   match m with
   | MLeft ->
     if i = 0 then
@@ -345,7 +371,7 @@ let process_move (m: move) (i: int) : unit = (**consider stuns*)
         () in ()
 
 
-let rec tickprocessor () =
+let rec tickprocessor () = (**need to call process attack*)
    let inputs = List.fold_right (fun x acc -> acc ^ (Char.escaped x)) !newinputs "" in
    print_endline inputs ;
    let process x =
