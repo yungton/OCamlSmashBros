@@ -1,4 +1,5 @@
 open Graphics
+open Character
 
 let bg_hex = "0x0C3D6F"
 let num_stars = 150
@@ -74,27 +75,27 @@ let draw_status_box pnum col (x,y) percent =
   draw_string ((string_of_int percent) ^ "%");
   moveto xi xy;
   set_color orig_col
-  
 
-let draw_char col (x,y) w h =
+let draw_char c =
   let orig_col = foreground in
-  set_color col;
-  fill_rect x y w h;
+  set_color green;
+  fill_rect (fst c.hitbox).x 
+            (fst c.hitbox).y 
+            (get_width c)
+            (get_height c);
   set_color orig_col
 
-let draw() = 
+let draw_characters (c1,c2) =
+  draw_char c1;
+  draw_char c2
+
+let draw cs = 
   draw_background();
   draw_stage();
-  draw_char red (300,125) 25 75;
-  draw_char blue (700,125) 25 75;
+  draw_characters cs;
   draw_status_box 1 red (220,10) 69;
   draw_status_box 2 blue ((size_x()-320),10) 69
 
-let _ = 
+let setup_window () = 
   open_graph " 1000x600"; 
   set_window_title "OCaml Smash Bros";
-  draw()
-
-let rec loop () = loop()
-
-let _ = loop()

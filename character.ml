@@ -32,14 +32,26 @@ type t = {
 
 type guy = Light | Medium | Heavy
 
-let get_width c  = (fst c.hitbox).x - (snd c.hitbox).x
+let get_width c  = (snd c.hitbox).x - (fst c.hitbox).x
 
-let get_height c = (fst c.hitbox).y - (snd c.hitbox).y
+let get_height c = (snd c.hitbox).y - (fst c.hitbox).y
 
 let hitbox_at_point c p = 
   let width = get_width c and height = get_height c in
   (p, { x=p.x+width; y = p.y+height })
 
+let test_attack = (1,1)
+
+let test_attacks = {
+  jab    = test_attack;
+  fsmash = test_attack;
+  usmash = test_attack;
+  dsmash = test_attack;
+  nspec  = test_attack;
+  fspec  = test_attack;
+  uspec  = test_attack;
+  dspec  = test_attack
+}
 let create (g:guy) p = {
   hitbox = (p, {x=p.x+50; y = p.y+100}); (* actual dimensions change with guy*)
   percent = 0;
@@ -49,17 +61,17 @@ let create (g:guy) p = {
   jumps = 2;
   lives = 3;
 
-  attacks = failwith "to discuss";
-  range = failwith "to discuss";
-  speed = failwith "to discuss";
-  weight = failwith "to discuss";
+  attacks = test_attacks;
+  range = 1;
+  speed = 1;
+  weight = 1
 }
 
-let moveto c p = c.hitbox <- hitbox_at_point c p
+let set_position c p = c.hitbox <- hitbox_at_point c p
 
 let set_jumps c i = c.jumps <- i
 
-let attack c = failwith "TODO"
+let attack c = failwith "attack TODO"
 
 let stun c time = c.stun <- time
 

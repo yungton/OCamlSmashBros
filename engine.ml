@@ -31,8 +31,6 @@ let stageright = 200
 
 let newinputs = ref []
 
-let _ = open_graph ""
-
 let stagecollision pos1 pos2 =
   let topdiff1 = pos1.y - stagetop in
   let topdiff2 = pos2.y - stagetop in
@@ -46,14 +44,14 @@ let stagecollision pos1 pos2 =
       ((fst characters).air <- false ;
       (fst characters).jumps <- 2 ;
       change_velocity (fst characters) {x=0;y=0} ;
-      moveto (fst characters) {x=pos1.x;y=stagetop})
+      set_position (fst characters) {x=pos1.x;y=stagetop})
       else
         if leftdiff1 > rightdiff1 then
           (change_velocity (fst characters) {x=0;y= (fst characters).velocity.y} ;
-          moveto (fst characters) {x=stageleft-ch1width;y=(fst ((fst characters).hitbox)).y} )
+          set_position (fst characters) {x=stageleft-ch1width;y=(fst ((fst characters).hitbox)).y} )
         else
           (change_velocity (fst characters) {x=0;y= (fst characters).velocity.y} ;
-          moveto (fst characters) {x=stageright;y=(fst ((fst characters).hitbox)).y} )
+          set_position (fst characters) {x=stageright;y=(fst ((fst characters).hitbox)).y} )
     else
       ()
   else
@@ -68,14 +66,14 @@ let stagecollision pos1 pos2 =
       ((snd characters).air <- false ;
       (snd characters).jumps <- 2 ;
       change_velocity (snd characters) {x=0;y=0} ;
-      moveto (snd characters) {x=pos2.x;y=stagetop})
+      set_position (snd characters) {x=pos2.x;y=stagetop})
       else
         if leftdiff2 > rightdiff2 then
           (change_velocity (snd characters) {x=0;y= (snd characters).velocity.y} ;
-          moveto (snd characters) {x=stageleft-ch2width;y=(fst ((snd characters).hitbox)).y} )
+          set_position (snd characters) {x=stageleft-ch2width;y=(fst ((snd characters).hitbox)).y} )
         else
           (change_velocity (snd characters) {x=0;y= (snd characters).velocity.y} ;
-          moveto (snd characters) {x=stageright;y=(fst ((snd characters).hitbox)).y} )
+          set_position (snd characters) {x=stageright;y=(fst ((snd characters).hitbox)).y} )
     else
       ()
   else
@@ -95,7 +93,7 @@ let update () =
      y=(fst characters).velocity.y + (fst ((fst characters).hitbox)).y} in
   let newpos2 = {x=(snd characters).velocity.x + (fst ((snd characters).hitbox)).x;
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
-  moveto (fst characters) newpos1 ; moveto (snd characters) newpos2 ;
+  set_position (fst characters) newpos1 ; set_position (snd characters) newpos2 ;
   let newvy1 = if (fst characters).air then
                  if (fst characters).stun < 1 then
                    if (fst characters).velocity.y = (fst characters).speed * fallconstant then
@@ -384,6 +382,7 @@ let rec tickprocessor () = (**need to call process attack*)
    let _ =
       ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
    newinputs := [] ;
+   Gui.draw characters;
    Thread.delay 0.017 ;
    tickprocessor ()
 
@@ -394,6 +393,7 @@ let rec input_loop () =
 
 let start_engine () =
   let _ = Thread.create input_loop () in
+  Gui.setup_window();
   Thread.join (Thread.create tickprocessor ())
 
 let _ = start_engine ()

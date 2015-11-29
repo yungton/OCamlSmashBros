@@ -1,4 +1,4 @@
-(*List of Character.t*)
-type observed
+val setup_window : unit -> unit
+
 (*Draws every character and the stage and background*)
-val draw : observed -> unit 
+val draw : Character.t * Character.t -> unit 

@@ -41,6 +41,12 @@ type guy = Light | Medium | Heavy
 val get_width : t -> int
 
 (**
+ * [get_height g] returns the width of character g
+ *)
+
+val get_height : t -> int
+
+(**
  * [create g] creates a new character that is of type g, which is of type guy.
  *)
 val create : guy -> point -> t
@@ -48,7 +54,7 @@ val create : guy -> point -> t
 (**
  * [moveto x p] moves the character x to point p
  *)
-val moveto : t -> point -> unit
+val set_position : t -> point -> unit
 
 (**
  * [attack x] simulates an attack by the character x.
