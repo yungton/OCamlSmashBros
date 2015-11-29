@@ -111,7 +111,23 @@ let collide (r1: rect) (r2: rect) : bool =
   let r1p2 = snd r1 in
   let r2p1 = fst r2 in
   let r2p2 = snd r2 in
-  if
+  let x_collide =
+    if (r1p1.x < r2p2.x && r1p1.x > r2p1.x) ||
+       (r2p1.x < r1p2.x && r2p1.x > r1p1.x) ||
+       (r1p1.x = r2p1.x && r1p2.x = r2p2.x) ||
+       (r1p1.x < r2p1.x && r1p2.x > r2p2.x) ||
+       (r2p1.x < r1p1.x && r2p2.x > r1p2.x) then
+      true
+    else false in
+  let y_collide =
+    if (r1p1.y < r2p2.y && r1p1.y > r2p1.y) ||
+       (r2p1.y < r1p2.y && r2p1.y > r1p1.y) ||
+       (r1p1.y = r2p1.y && r1p2.y = r2p2.y) ||
+       (r1p1.y < r2p1.y && r1p2.y > r2p2.y) ||
+       (r2p1.y < r1p1.y && r2p2.y > r1p2.y) then
+      true
+    else false in
+  x_collide && y_collide
 
 let process_attack (a: attack) (i: int) : unit =
   match a with
@@ -124,16 +140,23 @@ let process_attack (a: attack) (i: int) : unit =
       let newp2 = {x=p1.x;y=p2.y} in
       let attack_box = (newp1,newp2) in
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (snd characters).velocity <- {x=-1;y=0};
+        let perc = (snd characters).percent in
+        (snd characters).percent <- perc + 10;
+        (* This stun value should be a function of dmg *)
+        (snd characters).stun <- 3;
+        (* Attacking character is also stunned *)
+        (fst characters).stun <- 1;
         ()
       else
         ()
     else
       ()
-  | _ -> ()
-  (*| Right ->
-  | Up ->
-  | Down ->
-  | Neutral -> *)
+  | Right -> failwith "TODO"
+  | Up -> failwith "TODO"
+  | Down -> failwith "TODO"
+  | Neutral -> failwith "TODO"
 
 let process_move (m: move) (i: int) : unit = (**consider stuns*)
   let _ =
