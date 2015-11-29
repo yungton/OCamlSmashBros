@@ -7,11 +7,34 @@ let star_size = 1
 let planet_radius = 150
 let planet_offset = 50
 let stage_inset = 150
+let stagew = 1000
+let stageh = 600
+
+let og_stage = Array.make_matrix stageh stagew white
+
+let prev_pos = (ref {x = 0; y = 0}, ref {x = 0; y = 0})
 
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
   let r = c / 65536 and g = c / 256 mod 256 and b = c mod 256 in
   rgb r g b
+
+let copy_matrix m1 m2 =
+  for row=0 to (Array.length m1)-1 do
+    for col=0 to (Array.length m1.(0))-1 do
+      m1.(row).(col) <- m2.(row).(col)
+    done
+  done
+
+let portion_of_og_stage x y w h =
+  let result = Array.make_matrix h w white in
+  for row = 0 to h-1 do
+    for col = 0 to w-1 do
+      result.(row).(col) <- og_stage.(row+y).(col+x)
+    done;
+  done;
+  make_image result
+
 
 let draw_stage_top () = 
   let stage_width = size_x()-2*stage_inset in
@@ -76,9 +99,14 @@ let draw_status_box pnum col (x,y) percent =
   moveto xi xy;
   set_color orig_col
 
-let draw_char c =
+let draw_char c f col =
   let orig_col = foreground in
-  set_color green;
+  let erase_img = portion_of_og_stage (fst c.hitbox).x 
+                                      (fst c.hitbox).y 
+                                      (get_width c)
+                                      (get_height c) in
+  draw_image erase_img !(f prev_pos).x !(f prev_pos).y;
+  set_color col;
   fill_rect (fst c.hitbox).x 
             (fst c.hitbox).y 
             (get_width c)
@@ -86,16 +114,20 @@ let draw_char c =
   set_color orig_col
 
 let draw_characters (c1,c2) =
-  draw_char c1;
-  draw_char c2
+  draw_char c1 fst red;
+  draw_char c2 snd blue;
+  fst prev_pos := fst (c1.hitbox);
+  snd prev_pos := fst (c2.hitbox)
 
 let draw cs = 
-  draw_background();
-  draw_stage();
+  draw_stage_top();
   draw_characters cs;
-  draw_status_box 1 red (220,10) 69;
-  draw_status_box 2 blue ((size_x()-320),10) 69
+  draw_status_box 1 red (220,10) (fst cs).percent;
+  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent
 
 let setup_window () = 
-  open_graph " 1000x600"; 
+  open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
   set_window_title "OCaml Smash Bros";
+  draw_background();
+  draw_stage();
+  copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh))

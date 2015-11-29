@@ -10,26 +10,27 @@ type attack = Left | Right | Down | Up | Neutral
 
 type move = MLeft | MRight | MDown | MUp
 
-let characters = (create Light {x=100;y=100},create Medium {x=100;y=100})
-
-let ch1width = get_width (fst characters)
-let ch2width = get_width (snd characters)
-
 let lastmove = ref (MDown,1,MDown,1)
 (**These contants need to be set correctly for engine to work*)
 let fallconstant = -2
 
 let gravity = 5
 
-let jumpconstant = 1
+let jumpconstant = 10
 
-let stagetop = 100
+let stagetop = 125
 
-let stageleft = 100
+let stageleft = 200
 
-let stageright = 200
+let stageright = 800
 
 let newinputs = ref []
+
+let characters = (create Light {x=stageleft+100;y=stagetop},
+                  create Medium {x=stageright-100;y=stagetop})
+
+let ch1width = get_width (fst characters)
+let ch2width = get_width (snd characters)
 
 let stagecollision pos1 pos2 =
   let topdiff1 = pos1.y - stagetop in
@@ -370,8 +371,7 @@ let process_move (m: move) (i: int) : unit =
 
 
 let rec tickprocessor () = (**need to call process attack*)
-   let inputs = List.fold_right (fun x acc -> acc ^ (Char.escaped x)) !newinputs "" in
-   print_endline inputs ;
+   (* let inputs = List.fold_right (fun x acc -> acc ^ (Char.escaped x)) !newinputs "" in *)
    let process x =
      match x with
      | 'a' -> process_move MLeft 0
@@ -382,7 +382,7 @@ let rec tickprocessor () = (**need to call process attack*)
    let _ =
       ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
    newinputs := [] ;
-   Gui.draw characters;
+   Gui.draw_characters characters;
    Thread.delay 0.017 ;
    tickprocessor ()
 
@@ -394,6 +394,7 @@ let rec input_loop () =
 let start_engine () =
   let _ = Thread.create input_loop () in
   Gui.setup_window();
+  Gui.draw characters;
   Thread.join (Thread.create tickprocessor ())
 
 let _ = start_engine ()
