@@ -141,13 +141,13 @@ let process_attack (a: attack) (i: int) : unit =
       let attack_box = (newp1,newp2) in
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
-        (snd characters).velocity <- {x=-1;y=0};
+        change_velocity (snd characters) {x=-1;y=0};
         let perc = (snd characters).percent in
-        (snd characters).percent <- perc + 10;
+        get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
-        (snd characters).stun <- 3;
+        stun (snd characters) 3;
         (* Attacking character is also stunned *)
-        (fst characters).stun <- 1;
+        stun (fst characters) 1;
         ()
       else
         ()
