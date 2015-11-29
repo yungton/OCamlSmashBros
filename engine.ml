@@ -134,29 +134,163 @@ let process_attack (a: attack) (i: int) : unit =
   | Left ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
-      let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
+      (let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
       let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
       let newp1 = {x=p1.x - (fst characters).range;y=p1.y} in
       let newp2 = {x=p1.x;y=p2.y} in
       let attack_box = (newp1,newp2) in
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (snd characters) {x=-1;y=0};
+        (change_velocity (snd characters) {x=(-1);y=0};
         let perc = (snd characters).percent in
         get_hit (snd characters) 10;
         (* This stun value should be a function of dmg *)
         stun (snd characters) 3;
         (* Attacking character is also stunned *)
         stun (fst characters) 1;
-        ()
+        ())
       else
-        ()
+        ())
     else
-      ()
-  | Right -> failwith "TODO"
-  | Up -> failwith "TODO"
-  | Down -> failwith "TODO"
-  | Neutral -> failwith "TODO"
+      (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (snd characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x - (snd characters).range;y=p1.y} in
+      let newp2 = {x=p1.x;y=p2.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (fst characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (fst characters) {x=(-1);y=0};
+        let perc = (fst characters).percent in
+        get_hit (fst characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (fst characters) 3;
+        (* Attacking character is also stunned *)
+        stun (snd characters) 1;
+        ())
+      else
+        ())
+  | Right ->
+    if i = 0 then
+    (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p2.x;y=p1.y} in
+      let newp2 = {x=p2.x + (fst characters).range;y=p2.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (snd characters) {x=1;y=0};
+        let perc = (snd characters).percent in
+        get_hit (snd characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (snd characters) 3;
+        (* Attacking character is also stunned *)
+        stun (fst characters) 1;
+        ())
+      else
+        ())
+    else
+      (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (snd characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p2.x;y=p1.y} in
+      let newp2 = {x=p2.x + (snd characters).range;y=p2.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (fst characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (fst characters) {x=1;y=0};
+        let perc = (fst characters).percent in
+        get_hit (fst characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (fst characters) 3;
+        (* Attacking character is also stunned *)
+        stun (snd characters) 1;
+        ())
+      else
+        ())
+  | Up ->
+    if i = 0 then
+    (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x;y=p2.y} in
+      let newp2 = {x=p2.x;y=p2.y + (fst characters).range} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (snd characters) {x=0;y=1};
+        let perc = (snd characters).percent in
+        get_hit (snd characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (snd characters) 3;
+        (* Attacking character is also stunned *)
+        stun (fst characters) 1;
+        ())
+      else
+        ())
+    else
+      (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (snd characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x;y=p2.y} in
+      let newp2 = {x=p2.x;y=p2.y + (snd characters).range} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (fst characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (fst characters) {x=0;y=1};
+        let perc = (fst characters).percent in
+        get_hit (fst characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (fst characters) 3;
+        (* Attacking character is also stunned *)
+        stun (snd characters) 1;
+        ())
+      else
+        ())
+  (* Down needs to be fixed, right now it only works if character is in the air.
+     A down attack on the ground should function differently, the area hit should be
+     a horizontal rectangle on the bottom half of the character's hitbox. *)
+  | Down ->
+    if i = 0 then
+    (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x;y=p1.y - (fst characters).range} in
+      let newp2 = {x=p2.x;y=p1.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (snd characters) {x=0;y=(-1)};
+        let perc = (snd characters).percent in
+        get_hit (snd characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (snd characters) 3;
+        (* Attacking character is also stunned *)
+        stun (fst characters) 1;
+        ())
+      else
+        ())
+    else
+      (* Get a box that has width range and that is adjacent to the left of the character *)
+      (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
+      let p2 = (snd (snd characters).hitbox) in  (*Bottom right point of hitbox *)
+      let newp1 = {x=p1.x;y=p1.y - (snd characters).range} in
+      let newp2 = {x=p2.x;y=p1.y} in
+      let attack_box = (newp1,newp2) in
+      if collide attack_box (fst characters).hitbox then (*If the attack hits*)
+        (* This x value should be a function of dmg and attack strength *)
+        (change_velocity (fst characters) {x=0;y=(-1)};
+        let perc = (fst characters).percent in
+        get_hit (fst characters) 10;
+        (* This stun value should be a function of dmg *)
+        stun (fst characters) 3;
+        (* Attacking character is also stunned *)
+        stun (snd characters) 1;
+        ())
+      else
+        ())
+  | _ -> ()
 
 let process_move (m: move) (i: int) : unit = (**consider stuns*)
   let _ =
@@ -216,7 +350,7 @@ let process_move (m: move) (i: int) : unit = (**consider stuns*)
         (snd characters).air <- true ;
         lastmove := (a,b,MUp,12))
       else
-        ()
+        () in ()
 
 
 let rec tickprocessor () =
