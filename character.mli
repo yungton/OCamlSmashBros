@@ -38,7 +38,7 @@ type guy = Light | Medium | Heavy
  * [get_width g] returns the width of character g
  *)
 
-val get_width : guy -> int
+val get_width : t -> int
 
 (**
  * [create g] creates a new character that is of type g, which is of type guy.
