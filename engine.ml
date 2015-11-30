@@ -22,11 +22,11 @@ let momentumcounter2 = ref 0
 
 let jumpconstant = 1
 
-let stagetop = 125
+let stagetop = 101
 
-let stageleft = 200
+let stageleft = 150
 
-let stageright = 800
+let stageright = 850
 
 let newinputs = ref []
 
@@ -127,7 +127,7 @@ let update () =
     ((fst characters).stun <- (fst characters).stun -1 ;
     (fst characters).velocity.x )
     else
-      if !momentumcounter mod 35 = 0 then
+      if !momentumcounter mod 20 = 0 then
         0
       else
       (fst characters).velocity.x in
@@ -135,7 +135,7 @@ let update () =
     ((snd characters).stun <- (snd characters).stun -1 ;
     (snd characters).velocity.x )
     else
-      if !momentumcounter2 mod 35 = 0 then
+      if !momentumcounter2 mod 20 = 0 then
         0
       else
       (snd characters).velocity.x in
@@ -187,7 +187,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30)
+      stun (fst characters) 10)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Bottom left point of hitbox *)
@@ -205,7 +205,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30)
+      stun (snd characters) 10)
   | Right ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
@@ -224,7 +224,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30)
+      stun (fst characters) 10)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Bottom left point of hitbox *)
@@ -242,7 +242,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30)
+      stun (snd characters) 10)
   | Up ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
@@ -334,7 +334,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30)
+      stun (fst characters) 10)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Bottom left point of hitbox *)
@@ -355,7 +355,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30)
+      stun (snd characters) 10)
   (* Down needs to be fixed, right now it only works if character is in the air.
      A down attack on the ground should function differently, the area hit should be
      a horizontal rectangle on the bottom half of the character's hitbox.
@@ -383,7 +383,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30)
+      stun (fst characters) 10)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Bottom left point of hitbox *)
@@ -403,7 +403,7 @@ let process_attack (a: attack) (i: int) : unit =
       else
         ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30)
+      stun (snd characters) 10)
   | _ -> ()
 
 let process_move (m: move) (i: int) : unit =
