@@ -38,14 +38,14 @@ let portion_of_og_stage x y w h =
   make_image result
 
 
-let draw_stage_top () = 
+let draw_stage_top () =
   let stage_width = size_x()-2*stage_inset in
-  let inner_diff = 50 in 
+  let inner_diff = 50 in
   let x1 = stage_inset and y1 = 100 in
   let x2 = x1 + stage_width and y2 = y1 in
   let x3 = x1 + inner_diff and y3 = y1 + inner_diff in
   let x4 = x2 - inner_diff and y4 = y3 in
-  let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in 
+  let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in
   set_color (color_from_hex "0x181818");
   fill_poly poly;
   set_color black;
@@ -53,7 +53,7 @@ let draw_stage_top () =
   (* draw_poly poly *)
 
 
-let draw_stage_base () = 
+let draw_stage_base () =
   set_color black;
   fill_rect stage_inset 0 (size_x()-2*stage_inset-1) 100
 
@@ -67,9 +67,9 @@ let draw_star () =
   fill_rect x y star_size star_size;
   set_color orig_col
 
-let draw_planet up col accent = 
+let draw_planet up col accent =
   set_color col;
-  let (y,a1,a2) = if up then 0-planet_offset,0,180 
+  let (y,a1,a2) = if up then 0-planet_offset,0,180
                   else size_y()+planet_offset,180,360 in
   fill_arc (size_x()/2) y (size_x()) 150 a1 a2
 
@@ -78,7 +78,7 @@ let draw_sun ()   = draw_planet true yellow yellow
 
 let draw_background () =
   let orig_col = foreground in
-  let col = color_from_hex bg_hex in 
+  let col = color_from_hex bg_hex in
   set_color col;
   fill_rect 0 0 (size_x()) (size_y());
   for i=0 to num_stars do draw_star() done;
@@ -87,7 +87,7 @@ let draw_background () =
   draw_sun();
   set_color orig_col
 
-let draw_status_box pnum col (x,y) percent = 
+let draw_status_box pnum col (x,y) percent =
   let orig_col = foreground in
   let (xi, xy) = current_point() in
   set_color col;
@@ -103,8 +103,8 @@ let draw_status_box pnum col (x,y) percent =
 
 let draw_char c f col =
   let orig_col = foreground in
-(*   let erase_img = portion_of_og_stage (fst c.hitbox).x 
-                                      (fst c.hitbox).y 
+(*   let erase_img = portion_of_og_stage (fst c.hitbox).x
+                                      (fst c.hitbox).y
                                       (get_width c)
                                       (get_height c) in *)
   set_color (color_from_hex bg_hex);
@@ -112,13 +112,13 @@ let draw_char c f col =
   (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
   let cl = if c.stun > 0 then green else col in
   set_color cl;
-  fill_rect (fst c.hitbox).x 
-            (fst c.hitbox).y 
+  fill_rect (fst c.hitbox).x
+            (fst c.hitbox).y
             (get_width c)
             (get_height c);
   set_color orig_col
 
-  let draw_stick 
+
 
 let draw_characters (c1,c2) =
   incr count;
@@ -132,7 +132,7 @@ let draw_characters (c1,c2) =
 
   if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
-let draw cs = 
+let draw cs =
   draw_background();
   draw_stage();
   draw_characters cs;
@@ -140,6 +140,6 @@ let draw cs =
   draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent
   (* copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh)) *)
 
-let setup_window () = 
-  open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
+let setup_window () =
+  open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh));
   set_window_title "OCaml Smash Bros";
