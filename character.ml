@@ -36,7 +36,7 @@ let get_width c  = (snd c.hitbox).x - (fst c.hitbox).x
 
 let get_height c = (snd c.hitbox).y - (fst c.hitbox).y
 
-let hitbox_at_point c p = 
+let hitbox_at_point c p =
   let width = get_width c and height = get_height c in
   (p, { x=p.x+width; y = p.y+height })
 
@@ -63,7 +63,7 @@ let create (g:guy) p = {
 
   attacks = test_attacks;
   range = 1;
-  speed = 1;
+  speed = 5;
   weight = 1
 }
 
