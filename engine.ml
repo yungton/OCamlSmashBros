@@ -4,8 +4,7 @@ open Character
    a cheating tactic, a person can keep attacking and stunning themself, thus
    achieving a constant velocity to wherever they want to go
    discuss with kevin shae shae
-   UP/DOWN need the on ground fixes
-   need to map inputs to call process attack in tickprocessor*)
+   *)
 type attack = Left | Right | Down | Up | Neutral
 
 type move = MLeft | MRight | MDown | MUp
@@ -103,7 +102,7 @@ let update () =
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
   set_position (fst characters) newpos1 ; set_position (snd characters) newpos2 ;
   let newvy1 = if (fst characters).air then
-                 if (fst characters).stun < 1 then
+                 if (fst characters).stun < 5000000 then
                    if (fst characters).velocity.y = (fst characters).speed * fallconstant then
                      (fst characters).speed * fallconstant
                    else
@@ -114,7 +113,7 @@ let update () =
                  else (fst characters).velocity.y
                else 0 in
   let newvy2 = if (snd characters).air then
-                 if (snd characters).stun < 1 then
+                 if (snd characters).stun < 5000000 then
                    if (snd characters).velocity.y = (snd characters).speed * fallconstant then
                      (snd characters).speed * fallconstant
                    else
@@ -476,6 +475,20 @@ let process_move (m: move) (i: int) : unit =
       else
         () in ()
 
+let airesponse () =
+  let r = Ai.execute_response_to_state (fst characters) (snd characters) in
+  match r with
+  | "ML" -> process_move MLeft 1
+  | "MD" -> process_move MDown 1
+  | "MU" -> process_move MUp 1
+  | "MR" -> process_move MRight 1
+  | "AR" -> process_attack Right 1
+  | "AU" -> process_attack Up 1
+  | "AD" -> process_attack Down 1
+  | "AL" -> process_attack Left 1
+  | "" -> ()
+  | _ -> failwith "not correct input"
+
 
 let rec tickprocessor () = (**need to call process attack*)
    (* let inputs = List.fold_right (fun x acc -> acc ^ (Char.escaped x)) !newinputs "" in *)
@@ -491,7 +504,7 @@ let rec tickprocessor () = (**need to call process attack*)
      | 'i' -> process_attack Up 0
      | _ -> () in
    let _ =
-      ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
+      ignore(Thread.create (fun x -> let _ = List.iter process x in update () ; airesponse ()) !newinputs) in
    newinputs := [] ;
    ignore(Thread.create (Gui.draw_characters) characters);
    Thread.delay 0.017 ;
@@ -509,3 +522,5 @@ let start_engine () =
   Thread.join (Thread.create tickprocessor ())
 
 let _ = start_engine ()
+
+

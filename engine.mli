@@ -1,6 +1,6 @@
-type attack
+type attack = Left | Right | Down | Up | Neutral
 
-type move
+type move = MLeft | MRight | MDown | MUp
 
 (**
  * character is a list of characters in the current game.
