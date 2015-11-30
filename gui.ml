@@ -10,7 +10,7 @@ let stage_inset = 150
 let stagew = 1000
 let stageh = 600
 
-let count = ref 1
+let count = ref 0
 
 let og_stage = Array.make_matrix stageh stagew white
 
@@ -101,6 +101,12 @@ let draw_status_box pnum col (x,y) percent =
   moveto xi xy;
   set_color orig_col
 
+let draw_body x y w h =
+  fill_circle (x+w/4) (y+w/4) (w/4) ;
+  fill_circle (x+w*3/4) (y+w/4) (w/4) ;
+  fill_rect (x+w/3) (y+w/6) (w/3) (h-w/2);
+  fill_circle (x+w/2) (y+h-w/3) (w/6)
+
 let draw_char c f col =
   let orig_col = foreground in
 (*   let erase_img = portion_of_og_stage (fst c.hitbox).x 
@@ -112,7 +118,7 @@ let draw_char c f col =
   (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
   let cl = if c.stun > 0 then green else col in
   set_color cl;
-  fill_rect (fst c.hitbox).x 
+  draw_body (fst c.hitbox).x 
             (fst c.hitbox).y 
             (get_width c)
             (get_height c);
