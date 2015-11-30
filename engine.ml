@@ -253,13 +253,83 @@ let process_attack (a: attack) (i: int) : unit =
                    y=p1.y + ((p2.y - p1.y)/3)} in
       let newp2 = {x=p2.x + ((fst characters).range/2);
                    y=p2.y + ((fst characters).range/2)} in
-      let attack_box = (newp1,newp2) in
-      if collide attack_box (snd characters).hitbox then (*If the attack hits*)
+      let third = (newp2.x - newp1.x)/3 in
+      let b1p1 = {x=newp1.x;y=newp1.y} in
+      let b1p2 = {x=newp1.x + third;y=newp2.y} in
+      let b2p1 = {x=newp1.x + third;y=newp1.y} in
+      let b2p2 = {x=newp1.x + (2 * third);y=newp2.y} in
+      let b3p1 = {x=newp1.x + (2 * third);y=newp1.y} in
+      let b3p2 = {x=newp2.x;y=newp2.y} in
+      (* Three boxes, left, middle, right *)
+      let attack_box1 = (b1p1,b1p2) in
+      let attack_box2 = (b2p1,b2p2) in
+      let attack_box3 = (b3p1,b3p2) in
+      (* Hitting only left or right boxes sends enemy at 30 degree angle.
+       * Hitting left + middle or right + middle sends enemy at 60 degree angle.
+       * Hitting only middle or all three sends enemy straight up. *)
+
+      (*If the attack hits all three boxes *)
+      if collide attack_box1 (snd characters).hitbox &&
+         collide attack_box2 (snd characters).hitbox &&
+         collide attack_box3 (snd characters).hitbox then
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (snd characters) {x=0;
-                                          y=(snd characters).percent/2};
-        (snd characters).air <- true ;
+        change_velocity (snd characters)
+          {x=0;
+           y=(snd characters).percent/2};
+        (snd characters).air <- true;
+        stun (snd characters) 60;
+        ())
+      (*If the attack hits the left and middle box *)
+      else if collide attack_box1 (snd characters).hitbox &&
+         collide attack_box2 (snd characters).hitbox then
+        (get_hit (snd characters) 10;
+        (* This x value should be a function of dmg and attack strength *)
+        change_velocity (snd characters)
+          {x=(-1)*((snd characters).percent/2);
+           y=(((snd characters).percent/2)*173)/100};
+        (snd characters).air <- true;
+        stun (snd characters) 60;
+        ())
+      (*If the attack hits the middle and right box *)
+      else if collide attack_box2 (snd characters).hitbox &&
+              collide attack_box3 (snd characters).hitbox then
+        (get_hit (snd characters) 10;
+        (* This x value should be a function of dmg and attack strength *)
+        change_velocity (snd characters)
+          {x=(snd characters).percent/2;
+           y=(((snd characters).percent/2)*173)/100};
+        (snd characters).air <- true;
+        stun (snd characters) 60;
+        ())
+      (*If the attack hits the left box only *)
+      else if collide attack_box1 (snd characters).hitbox then
+        (get_hit (snd characters) 10;
+        (* This x value should be a function of dmg and attack strength *)
+        change_velocity (snd characters)
+          {x=(-1)*((((snd characters).percent/2)*173)/100);
+           y=(snd characters).percent/2};
+        (snd characters).air <- true;
+        stun (snd characters) 60;
+        ())
+      (*If the attack hits the right box only *)
+      else if collide attack_box3 (snd characters).hitbox then
+        (get_hit (snd characters) 10;
+        (* This x value should be a function of dmg and attack strength *)
+        change_velocity (snd characters)
+          {x=(((snd characters).percent/2)*173)/100;
+           y=(snd characters).percent/2};
+        (snd characters).air <- true;
+        stun (snd characters) 60;
+        ())
+      (*If the attack hits the middle box only *)
+      else if collide attack_box2 (snd characters).hitbox then
+        (get_hit (snd characters) 10;
+        (* This x value should be a function of dmg and attack strength *)
+        change_velocity (snd characters)
+          {x=0;
+           y=(snd characters).percent/2};
+        (snd characters).air <- true;
         stun (snd characters) 60;
         ())
       else
