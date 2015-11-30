@@ -186,9 +186,9 @@ let process_attack (a: attack) (i: int) : unit =
         stun (snd characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30
+      stun (fst characters) 30)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
@@ -204,9 +204,9 @@ let process_attack (a: attack) (i: int) : unit =
         stun (fst characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30
+      stun (snd characters) 30)
   | Right ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
@@ -223,9 +223,9 @@ let process_attack (a: attack) (i: int) : unit =
         stun (snd characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30
+      stun (fst characters) 30)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
@@ -241,9 +241,9 @@ let process_attack (a: attack) (i: int) : unit =
         stun (fst characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (snd characters) 30
+      stun (snd characters) 30)
   | Up ->
     if i = 0 then
     (* Get a box that has width range and that is adjacent to the left of the character *)
@@ -263,9 +263,9 @@ let process_attack (a: attack) (i: int) : unit =
         stun (snd characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30
+      stun (fst characters) 30)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
@@ -300,7 +300,7 @@ let process_attack (a: attack) (i: int) : unit =
       (let p1 = (fst (fst characters).hitbox) in (*Top left point of hitbox *)
       let p2 = (snd (fst characters).hitbox) in  (*Bottom right point of hitbox *)
       let newp1 = {x=p1.x - ((fst characters).range/2);
-                   y=p1.y - ((fst characters).range/2} in
+                   y=p1.y - ((fst characters).range/2)} in
       let newp2 = {x=p2.x + ((fst characters).range/2);
                    y=p1.y + ((p2.y - p1.y)/3)} in
       let attack_box = (newp1,newp2) in
@@ -312,15 +312,15 @@ let process_attack (a: attack) (i: int) : unit =
         stun (snd characters) 60;
         ())
       else
-        ());
+        ();
       (* Attacking character is also stunned *)
-      stun (fst characters) 30
+      stun (fst characters) 30)
     else
       (* Get a box that has width range and that is adjacent to the left of the character *)
       (let p1 = (fst (snd characters).hitbox) in (*Top left point of hitbox *)
       let p2 = (snd (snd characters).hitbox) in  (*Bottom right point of hitbox *)
       let newp1 = {x=p1.x - ((snd characters).range/2);
-                   y=p1.y - ((snd characters).range/2} in
+                   y=p1.y - ((snd characters).range/2)} in
       let newp2 = {x=p2.x + ((snd characters).range/2);
                    y=p1.y + ((p2.y - p1.y)/3)} in
       let attack_box = (newp1,newp2) in
