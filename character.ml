@@ -32,6 +32,38 @@ type t = {
 
 type guy = Light | Medium | Heavy
 
+type attributes = {
+  width:  int;
+  height: int;
+  speed:  int;
+  weight: int;
+  range:  int
+}
+
+let attributes_for_guy = function
+  | Light -> {
+      width  = 30;
+      height = 75;
+      speed  = 5;
+      weight = 1;
+      range  = 1
+    }
+  | Medium -> {
+      width  = 50;
+      height = 100;
+      speed  = 3;
+      weight = 2;
+      range  = 2
+    }
+  | Heavy -> {
+      width  = 75;
+      height = 125;
+      speed  = 2;
+      weight = 3;
+      range  = 3
+    }
+
+
 let get_width c  = (snd c.hitbox).x - (fst c.hitbox).x
 
 let get_height c = (snd c.hitbox).y - (fst c.hitbox).y
@@ -52,20 +84,22 @@ let test_attacks = {
   uspec  = test_attack;
   dspec  = test_attack
 }
-let create (g:guy) p = {
-  hitbox = (p, {x=p.x+50; y = p.y+100}); (* actual dimensions change with guy*)
-  percent = 0;
-  stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
-  air = false;
-  velocity = {x = 0;y = 0};
-  jumps = 2;
-  lives = 3;
+let create (g:guy) p = 
+  let atts = attributes_for_guy g in 
+  { 
+    hitbox = (p, {x=p.x+atts.width; y = p.y+atts.height}); (* actual dimensions change with guy*)
+    percent = 0;
+    stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
+    air = false;
+    velocity = {x = 0;y = 0};
+    jumps = 2;
+    lives = 3;
 
-  attacks = test_attacks;
-  range = 1;
-  speed = 5;
-  weight = 1
-}
+    attacks = test_attacks;
+    range = atts.range;
+    speed = atts.speed;
+    weight = atts.weight
+  }
 
 let set_position c p = c.hitbox <- hitbox_at_point c p
 
