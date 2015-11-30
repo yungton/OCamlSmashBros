@@ -1,4 +1,5 @@
 open Engine
+open Character
 
 let stage_left = 150 
 let stage_right = 1150
@@ -15,7 +16,7 @@ let c1Position c1 ai =
 	if (fst c1.hitbox).x > (fst ai.hitbox).x then RightOf else Inside
 
 let move c1 ai = match (c1Position c1 ai) with
-	| LeftOf -> process_move MLeft 1
+	| LeftOf -> process_move Engine.MLeft 1
 	| RightOf -> process_move MRight 1
 	| Above -> process_move MUp 1
 	| Below -> process_move MDown 1
@@ -38,7 +39,7 @@ let recover c1 ai =
 
 let react c1 ai = 
 	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in 
-	let position_value_y = (fst c1.hitbox).y - (fst ai.hitbox).y
+	let position_value_y = (fst c1.hitbox).y - (fst ai.hitbox).y in
 	let ai_pos = (fst ai.hitbox) in 
 
 	if (ai_pos.x <= stage_left) || (ai_pos.x >= stage_right) then Recover else
