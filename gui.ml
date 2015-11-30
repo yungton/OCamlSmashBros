@@ -10,7 +10,7 @@ let stage_inset = 150
 let stagew = 1000
 let stageh = 600
 
-let count = ref 0
+let count = ref 1
 
 let og_stage = Array.make_matrix stageh stagew white
 
