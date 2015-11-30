@@ -40,11 +40,11 @@ let portion_of_og_stage x y w h =
 
 let draw_stage_top () = 
   let stage_width = size_x()-2*stage_inset in
-  let inner_diff = 50 in 
+  let inner_diff = 25 in 
   let x1 = stage_inset and y1 = 100 in
   let x2 = x1 + stage_width and y2 = y1 in
-  let x3 = x1 + inner_diff and y3 = y1 + inner_diff in
-  let x4 = x2 - inner_diff and y4 = y3 in
+  let x3 = x1 + 2*inner_diff and y3 = y1 + inner_diff in
+  let x4 = x2 - 2*inner_diff and y4 = y3 in
   let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in 
   set_color (color_from_hex "0x181818");
   fill_poly poly;
@@ -114,7 +114,7 @@ let draw_char c f col =
                                       (get_width c)
                                       (get_height c) in *)
   set_color (color_from_hex bg_hex);
-  fill_rect !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
+  draw_body !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
   (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
   let cl = if c.stun > 0 then green else col in
   set_color cl;
