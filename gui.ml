@@ -81,8 +81,8 @@ let draw_background () =
   fill_rect 0 0 (size_x()) (size_y());
   for i=0 to num_stars do draw_star() done;
   (* draw_planet false yellow yellow; *)
-  (* draw_earth(); *)
-  (* draw_sun(); *)
+  draw_earth();
+  draw_sun();
   set_color orig_col
 
 let draw_status_box pnum col (x,y) percent = 
@@ -106,7 +106,8 @@ let draw_char c f col =
                                       (get_width c)
                                       (get_height c) in
   draw_image erase_img !(f prev_pos).x !(f prev_pos).y;
-  set_color col;
+  let cl = if c.stun > 0 then green else col in
+  set_color cl;
   fill_rect (fst c.hitbox).x 
             (fst c.hitbox).y 
             (get_width c)
@@ -120,14 +121,13 @@ let draw_characters (c1,c2) =
   snd prev_pos := fst (c2.hitbox)
 
 let draw cs = 
-  draw_stage_top();
+  draw_background();
+  draw_stage();
   draw_characters cs;
   draw_status_box 1 red (220,10) (fst cs).percent;
-  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent
+  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent;
+  copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh))
 
 let setup_window () = 
   open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
   set_window_title "OCaml Smash Bros";
-  draw_background();
-  draw_stage();
-  copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh))
