@@ -1,4 +1,3 @@
-open Engine
 open Character
 
 let stage_left = 150 
@@ -8,7 +7,7 @@ type reaction = Move | Attack | Recover
 
 type position = LeftOf | RightOf | Above | Below | Inside
 
-(*Not complete*)
+
 let c1Position c1 ai = 
 	if (fst c1.hitbox).y > (fst ai.hitbox).y then Above else
 	if (fst c1.hitbox).y < (fst ai.hitbox).y then Below else
@@ -16,26 +15,26 @@ let c1Position c1 ai =
 	if (fst c1.hitbox).x > (fst ai.hitbox).x then RightOf else Inside
 
 let move c1 ai = match (c1Position c1 ai) with
-	| LeftOf -> process_move Engine.MLeft 1
-	| RightOf -> process_move MRight 1
-	| Above -> process_move MUp 1
-	| Below -> process_move MDown 1
-	| Inside -> ()
+	| LeftOf -> "ML"
+	| RightOf -> "MR"
+	| Above -> "MU"
+	| Below -> "MD"
+	| Inside -> ""
 
 let attack c1 ai = match (c1Position c1 ai) with
-	| LeftOf -> process_attack Left 1
-	| RightOf -> process_attack Right 1
-	| Above -> process_attack Up 1
-	| Below -> process_attack Down 1
-	| Inside -> process_attack Down 1
+	| LeftOf -> "AL"
+	| RightOf -> "AR"
+	| Above -> "AU"
+	| Below -> "AD"
+	| Inside -> "AD"
 
 let recover c1 ai = 
 	let ai_pos = (fst ai.hitbox) in 
 
-	if ai.jumps <> 0 then process_move MUp 1 else 
+	if ai.jumps <> 0 then "MU" else 
 
-	if (ai_pos.x <= stage_left) then process_move MRight 1 else 
-		process_move MLeft 1
+	if (ai_pos.x <= stage_left) then "MR" else 
+		"ML"
 
 let react c1 ai = 
 	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in 

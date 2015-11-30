@@ -1,5 +1,6 @@
 open Graphics
 open Character
+open Ai
 (**attacking character should be stunned on missed attack but this brings up
    a cheating tactic, a person can keep attacking and stunning themself, thus
    achieving a constant velocity to wherever they want to go
@@ -491,7 +492,7 @@ let rec tickprocessor () = (**need to call process attack*)
      | 'i' -> process_attack Up 0
      | _ -> () in
    let _ =
-      ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
+      ignore(Thread.create (fun x -> let _ = List.iter process x in update (); execute_response_to_state (fst characters) (snd characters)) !newinputs) in
    newinputs := [] ;
    ignore(Thread.create (Gui.draw_characters) characters);
    Thread.delay 0.017 ;
@@ -509,3 +510,6 @@ let start_engine () =
   Thread.join (Thread.create tickprocessor ())
 
 let _ = start_engine ()
+
+
+

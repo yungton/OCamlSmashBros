@@ -118,6 +118,8 @@ let draw_char c f col =
             (get_height c);
   set_color orig_col
 
+  let draw_stick 
+
 let draw_characters (c1,c2) =
   incr count;
   draw_stage_top();
