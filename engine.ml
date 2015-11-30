@@ -14,9 +14,14 @@ let lastmove = ref (MDown,1,MDown,1)
 (**These contants need to be set correctly for engine to work*)
 let fallconstant = -2
 
-let gravity = 5
+let gravity = 1
 
-let jumpconstant = 10
+let gravitycounter = ref 0
+let momentumcounter = ref 0
+let gravitycounter2 = ref 0
+let momentumcounter2 = ref 0
+
+let jumpconstant = 1
 
 let stagetop = 125
 
@@ -89,7 +94,9 @@ let update () =
      y=(fst characters).velocity.y + (fst ((fst characters).hitbox)).y} in
   let newpos2test = {x=(snd characters).velocity.x + (fst ((snd characters).hitbox)).x;
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
-  stagecollision newpos1test newpos2test ;
+  stagecollision newpos1test newpos2test ; gravitycounter := !gravitycounter + 1 ;
+  gravitycounter2 := !gravitycounter2 + 1 ; momentumcounter := !momentumcounter + 1 ;
+  momentumcounter2 := !momentumcounter2 + 1 ;
   let newpos1 = {x=(fst characters).velocity.x + (fst ((fst characters).hitbox)).x;
      y=(fst characters).velocity.y + (fst ((fst characters).hitbox)).y} in
   let newpos2 = {x=(snd characters).velocity.x + (fst ((snd characters).hitbox)).x;
@@ -100,7 +107,10 @@ let update () =
                    if (fst characters).velocity.y = (fst characters).speed * fallconstant then
                      (fst characters).speed * fallconstant
                    else
-                     max ((fst characters).velocity.y - gravity) (fst characters).speed * fallconstant/2
+                     if !gravitycounter mod 20 = 0 then
+                       max ((fst characters).velocity.y - gravity) (fst characters).speed * fallconstant/2
+                     else
+                       (fst characters).velocity.y
                  else (fst characters).velocity.y
                else 0 in
   let newvy2 = if (snd characters).air then
@@ -108,17 +118,28 @@ let update () =
                    if (snd characters).velocity.y = (snd characters).speed * fallconstant then
                      (snd characters).speed * fallconstant
                    else
-                     max ((snd characters).velocity.y - gravity) (snd characters).speed * fallconstant/2
+                     if !gravitycounter2 mod 20 = 0 then
+                       max ((snd characters).velocity.y - gravity) (snd characters).speed * fallconstant/2
+                     else
+                       (snd characters).velocity.y
                  else (snd characters).velocity.y
                else 0 in
   let newvx1 = if (fst characters).stun > 0 then
     ((fst characters).stun <- (fst characters).stun -1 ;
     (fst characters).velocity.x )
-    else 0 in
+    else
+      if !momentumcounter mod 35 = 0 then
+        0
+      else
+      (fst characters).velocity.x in
   let newvx2 = if (snd characters).stun > 0 then
     ((snd characters).stun <- (snd characters).stun -1 ;
     (snd characters).velocity.x )
-    else 0 in
+    else
+      if !momentumcounter2 mod 35 = 0 then
+        0
+      else
+      (snd characters).velocity.x in
   change_velocity (fst characters) {x=newvx1;y=newvy1} ;
   change_velocity (snd characters) {x=newvx2;y=newvy2} ;
   let (a,b,c,d) = !lastmove in
@@ -309,39 +330,45 @@ let process_attack (a: attack) (i: int) : unit =
   | _ -> ()
 
 let process_move (m: move) (i: int) : unit =
-  let ch = if i = 0 then fst characters else snd characters in
+  let ch = if i = 0 then  fst characters else snd characters in
   let _ = if ch.stun > 0 then () else
   match m with
   | MLeft ->
     if i = 0 then
       (let newv = {x=(fst characters).speed * (-1);y=(fst characters).velocity.y} in
+      momentumcounter := 0 ;
       change_velocity (fst characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (MLeft,12,c,d))
     else
       (let newv = {x=(snd characters).speed * (-1);y=(snd characters).velocity.y} in
+      momentumcounter2 := 0 ;
       change_velocity (snd characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (a,b,MLeft,12))
   | MRight ->
     if i = 0 then
       (let newv = {x=(fst characters).speed;y=(fst characters).velocity.y} in
+      momentumcounter := 0 ;
       change_velocity (fst characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (MRight,12,c,d))
     else
       (let newv = {x=(snd characters).speed;y=(snd characters).velocity.y} in
+      momentumcounter2 := 0 ;
       change_velocity (snd characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (a,b,MRight,12))
   | MDown ->
     if i = 0 then
       (let newv = {x=(fst characters).velocity.x;y=(fst characters).speed * fallconstant} in
+      momentumcounter := 0 ;
       change_velocity (fst characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (MDown,12,c,d))
     else
       (let newv = {x=(snd characters).velocity.x;y=(snd characters).speed * fallconstant} in
+      momentumcounter2 := 0 ;
       change_velocity (snd characters) newv ;
       let (a,b,c,d) = !lastmove in
       lastmove := (a,b,MDown,12))
@@ -351,7 +378,8 @@ let process_move (m: move) (i: int) : unit =
       let jumpconstant = if a = MUp && b > 0 then jumpconstant*2 else jumpconstant in
       let newv = {x=(fst characters).velocity.x;y=(fst characters).speed * jumpconstant} in
       if (fst characters).jumps > 0 then
-        (change_velocity (fst characters) newv ;
+        (gravitycounter := 0 ;
+        change_velocity (fst characters) newv ;
         (fst characters).jumps <- (fst characters).jumps -1 ;
         (fst characters).air <- true ;
         lastmove := (MUp,12,c,d))
@@ -362,7 +390,8 @@ let process_move (m: move) (i: int) : unit =
       let jumpconstant = if c = MUp && d>0 then jumpconstant*2 else jumpconstant in
       let newv = {x=(snd characters).velocity.x;y=(snd characters).speed * jumpconstant} in
       if (snd characters).jumps > 0 then
-        (change_velocity (snd characters) newv ;
+        (gravitycounter2 := 0 ;
+        change_velocity (snd characters) newv ;
         (snd characters).jumps <- (snd characters).jumps -1 ;
         (snd characters).air <- true ;
         lastmove := (a,b,MUp,12))
@@ -382,7 +411,7 @@ let rec tickprocessor () = (**need to call process attack*)
    let _ =
       ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
    newinputs := [] ;
-   Gui.draw_characters characters;
+   ignore(Thread.create (Gui.draw_characters) characters);
    Thread.delay 0.017 ;
    tickprocessor ()
 
