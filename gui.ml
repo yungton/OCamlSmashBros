@@ -10,9 +10,11 @@ let stage_inset = 150
 let stagew = 1000
 let stageh = 600
 
+let count = ref 0
+
 let og_stage = Array.make_matrix stageh stagew white
 
-let prev_pos = (ref {x = 0; y = 0}, ref {x = 0; y = 0})
+let prev_pos = (ref {x=300;y=125}, ref {x=700;y=125})
 
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
@@ -44,11 +46,11 @@ let draw_stage_top () =
   let x3 = x1 + inner_diff and y3 = y1 + inner_diff in
   let x4 = x2 - inner_diff and y4 = y3 in
   let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in 
-  set_color (color_from_hex "0x222222");
+  set_color (color_from_hex "0x181818");
   fill_poly poly;
   set_color black;
-  set_line_width 5;
-  draw_poly poly
+  set_line_width 5
+  (* draw_poly poly *)
 
 
 let draw_stage_base () = 
@@ -101,11 +103,13 @@ let draw_status_box pnum col (x,y) percent =
 
 let draw_char c f col =
   let orig_col = foreground in
-  let erase_img = portion_of_og_stage (fst c.hitbox).x 
+(*   let erase_img = portion_of_og_stage (fst c.hitbox).x 
                                       (fst c.hitbox).y 
                                       (get_width c)
-                                      (get_height c) in
-  draw_image erase_img !(f prev_pos).x !(f prev_pos).y;
+                                      (get_height c) in *)
+  set_color (color_from_hex bg_hex);
+  fill_rect !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
+  (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
   let cl = if c.stun > 0 then green else col in
   set_color cl;
   fill_rect (fst c.hitbox).x 
@@ -115,18 +119,24 @@ let draw_char c f col =
   set_color orig_col
 
 let draw_characters (c1,c2) =
+  incr count;
+  draw_stage_top();
   draw_char c1 fst red;
   draw_char c2 snd blue;
   fst prev_pos := fst (c1.hitbox);
-  snd prev_pos := fst (c2.hitbox)
+  snd prev_pos := fst (c2.hitbox);
+  draw_status_box 1 red (220,10) c1.percent;
+  draw_status_box 2 blue ((size_x()-320),10) c2.percent;
+
+  if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
 let draw cs = 
   draw_background();
   draw_stage();
   draw_characters cs;
   draw_status_box 1 red (220,10) (fst cs).percent;
-  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent;
-  copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh))
+  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent
+  (* copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh)) *)
 
 let setup_window () = 
   open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
