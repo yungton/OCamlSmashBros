@@ -415,6 +415,10 @@ let rec tickprocessor () = (**need to call process attack*)
      | 'w' -> process_move MUp 0
      | 's' -> process_move MDown 0
      | 'd' -> process_move MRight 0
+     | 'j' -> process_attack Left 0
+     | 'k' -> process_attack Down 0
+     | 'l' -> process_attack Right 0
+     | 'i' -> process_attack Up 0
      | _ -> () in
    let _ =
       ignore(Thread.create (fun x -> let _ = List.iter process x in update ()) !newinputs) in
