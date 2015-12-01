@@ -14,6 +14,18 @@ let c1Position c1 ai =
 	if (fst c1.hitbox).x < (fst ai.hitbox).x then LeftOf else
 	if (fst c1.hitbox).x > (fst ai.hitbox).x then RightOf else Inside
 
+let chooseAttack c1 ai = 
+	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in 
+
+	if (fst c1.hitbox).y > (fst ai.hitbox).y && 
+		(position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then
+		Above else
+	if (fst c1.hitbox).y < (fst ai.hitbox).y && 
+		(position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then
+		Below else
+	if (fst c1.hitbox).x < (fst ai.hitbox).x then LeftOf else
+	if (fst c1.hitbox).x > (fst ai.hitbox).x then RightOf else Inside
+
 let move c1 ai = match (c1Position c1 ai) with
 	| LeftOf -> "ML"
 	| RightOf -> "MR"
@@ -21,7 +33,7 @@ let move c1 ai = match (c1Position c1 ai) with
 	| Below -> "MD"
 	| Inside -> ""
 
-let attack c1 ai = match (c1Position c1 ai) with
+let attack c1 ai = match (chooseAttack c1 ai) with
 	| LeftOf -> "AL"
 	| RightOf -> "AR"
 	| Above -> "AU"
@@ -44,12 +56,15 @@ let react c1 ai =
 	if (ai_pos.x <= stage_left) || (ai_pos.x >= stage_right) then Recover else
 
 	if ((position_value_x >= -(ai.range)) && (position_value_x <= ai.range))
-		|| ((position_value_y <= ai.range) && (position_value_y >= -(ai.range))) then 
+		|| ((position_value_y <= ai.range) && (position_value_y >= -(ai.range))) 
+			&& (position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then 
 		Attack else
 			Move
 
-let execute_response_to_state c1 ai = match react c1 ai with
-	| Move -> move c1 ai
+let execute_response_to_state c1 ai = 
+
+	match react c1 ai with
+	| Move -> move c1 ai 
 	| Attack -> attack c1 ai
 	| Recover -> recover c1 ai
 
