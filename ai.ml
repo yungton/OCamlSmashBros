@@ -1,7 +1,7 @@
 open Character
 
 let stage_left = 150 
-let stage_right = 1150
+let stage_right = 850
 
 type reaction = Move | Attack | Recover
 

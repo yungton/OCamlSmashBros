@@ -119,36 +119,33 @@ let draw_guy x y w h =
   lineto (x+w) y;
   moveto xi yi
 
-
-
 let draw_body x y w h =
   fill_circle (x+w/4) (y+w/4) (w/4) ;
   fill_circle (x+w*3/4) (y+w/4) (w/4) ;
   fill_rect (x+w/3) (y+w/6) (w/3) (h-w/2);
   fill_circle (x+w/2) (y+h-w/3) (w/6)
 
-let draw_char c f col =
+let draw_char egg c f col =
   let orig_col = foreground in
-(*   let erase_img = portion_of_og_stage (fst c.hitbox).x 
-                                      (fst c.hitbox).y 
-                                      (get_width c)
-                                      (get_height c) in *)
   set_color (color_from_hex bg_hex);
-  draw_guy !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
-  (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
+  let drawf = if egg then draw_body else draw_guy in
+  drawf !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
   let cl = if c.stun > 0 then green else col in
   set_color cl;
-  draw_guy (fst c.hitbox).x 
-            (fst c.hitbox).y 
-            (get_width c)
-            (get_height c);
+  drawf (fst c.hitbox).x 
+        (fst c.hitbox).y 
+        (get_width c)
+        (get_height c);
   set_color orig_col
+
+(* Set this boolean to true if you want an easter egg ;) *)
+let draw_player = draw_char false
 
 let draw_characters (c1,c2) =
   incr count;
   draw_stage_top();
-  draw_char c1 fst red;
-  draw_char c2 snd blue;
+  draw_player c1 fst red;
+  draw_player c2 snd blue;
   fst prev_pos := fst (c1.hitbox);
   snd prev_pos := fst (c2.hitbox);
   draw_status_box 1 red (220,10) c1.percent;
