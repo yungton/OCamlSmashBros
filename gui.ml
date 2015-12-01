@@ -14,7 +14,7 @@ let count = ref 0
 
 let og_stage = Array.make_matrix stageh stagew white
 
-let prev_pos = (ref {x=300;y=125}, ref {x=700;y=125})
+let prev_pos = (ref {x=250;y=102}, ref {x=750;y=102})
 
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
@@ -83,8 +83,8 @@ let draw_background () =
   fill_rect 0 0 (size_x()) (size_y());
   for i=0 to num_stars do draw_star() done;
   (* draw_planet false yellow yellow; *)
-  draw_earth();
-  draw_sun();
+  (* draw_earth(); *)
+  (* draw_sun(); *)
   set_color orig_col
 
 let draw_status_box pnum col (x,y) percent = 
@@ -101,6 +101,26 @@ let draw_status_box pnum col (x,y) percent =
   moveto xi xy;
   set_color orig_col
 
+let draw_guy x y w h =
+  let (xi,yi) = current_point() in
+  let xb = x+w/2 in
+  let yab = y+h-w and ylb = y+(min w (h/4)) in
+  fill_circle xb (y+h-w/2) (w/2);
+  set_line_width 5;
+  moveto xb (y+h-5);
+  lineto xb ylb;
+  moveto xb yab;
+  lineto x (yab-w/2);
+  moveto xb yab;
+  lineto (x+w) (yab-w/2);
+  moveto xb ylb;
+  lineto x y;
+  moveto xb ylb;
+  lineto (x+w) y;
+  moveto xi yi
+
+
+
 let draw_body x y w h =
   fill_circle (x+w/4) (y+w/4) (w/4) ;
   fill_circle (x+w*3/4) (y+w/4) (w/4) ;
@@ -114,11 +134,11 @@ let draw_char c f col =
                                       (get_width c)
                                       (get_height c) in *)
   set_color (color_from_hex bg_hex);
-  draw_body !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
+  draw_guy !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
   (* draw_image erase_img !(f prev_pos).x !(f prev_pos).y; *)
   let cl = if c.stun > 0 then green else col in
   set_color cl;
-  draw_body (fst c.hitbox).x 
+  draw_guy (fst c.hitbox).x 
             (fst c.hitbox).y 
             (get_width c)
             (get_height c);
