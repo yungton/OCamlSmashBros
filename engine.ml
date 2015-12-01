@@ -481,7 +481,7 @@ let process_move (m: move) (i: int) : unit =
         () in ()
 
 let airesponse () =
-  if !aicounter mod 2 = 0 then
+  if !aicounter mod 1 = 0 then
     let r = Ai.execute_response_to_state (fst characters) (snd characters) in
     match r with
     | "ML" -> process_move MLeft 1
