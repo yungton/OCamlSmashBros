@@ -171,6 +171,8 @@ let collide (r1: rect) (r2: rect) : bool =
   x_collide && y_collide
 
 let process_attack (a: attack) (i: int) : unit =
+  let ch = if i = 0 then  fst characters else snd characters in
+  let _ = if ch.stun > 0 then () else
   match a with
   | Left ->
     if i = 0 then
@@ -407,7 +409,7 @@ let process_attack (a: attack) (i: int) : unit =
         ();
       (* Attacking character is also stunned *)
       stun (snd characters) 10)
-  | _ -> ()
+  | _ -> () in ()
 
 let process_move (m: move) (i: int) : unit =
   let ch = if i = 0 then  fst characters else snd characters in
