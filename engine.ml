@@ -14,6 +14,9 @@ let lastmove = ref (MDown,1,MDown,1)
 let fallconstant = -2
 
 let gravity = 1
+let knockbackstun = 40
+
+let aicounter = ref 0
 
 let gravitycounter = ref 0
 let momentumcounter = ref 0
@@ -95,30 +98,30 @@ let update () =
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
   stagecollision newpos1test newpos2test ; gravitycounter := !gravitycounter + 1 ;
   gravitycounter2 := !gravitycounter2 + 1 ; momentumcounter := !momentumcounter + 1 ;
-  momentumcounter2 := !momentumcounter2 + 1 ;
+  momentumcounter2 := !momentumcounter2 + 1 ; aicounter := !aicounter + 1 ;
   let newpos1 = {x=(fst characters).velocity.x + (fst ((fst characters).hitbox)).x;
      y=(fst characters).velocity.y + (fst ((fst characters).hitbox)).y} in
   let newpos2 = {x=(snd characters).velocity.x + (fst ((snd characters).hitbox)).x;
      y=(snd characters).velocity.y + (fst ((snd characters).hitbox)).y} in
   set_position (fst characters) newpos1 ; set_position (snd characters) newpos2 ;
   let newvy1 = if (fst characters).air then
-                 if (fst characters).stun < 5000000 then
+                 if (fst characters).stun < 11 then
                    if (fst characters).velocity.y = (fst characters).speed * fallconstant then
                      (fst characters).speed * fallconstant
                    else
-                     if !gravitycounter mod 20 = 0 then
-                       max ((fst characters).velocity.y - gravity) (fst characters).speed * fallconstant/2
+                     if !gravitycounter mod 4 = 0 then
+                       max ((fst characters).velocity.y - gravity) ((fst characters).speed * fallconstant/2)
                      else
                        (fst characters).velocity.y
                  else (fst characters).velocity.y
                else 0 in
   let newvy2 = if (snd characters).air then
-                 if (snd characters).stun < 5000000 then
+                 if (snd characters).stun < 11 then
                    if (snd characters).velocity.y = (snd characters).speed * fallconstant then
                      (snd characters).speed * fallconstant
                    else
-                     if !gravitycounter2 mod 20 = 0 then
-                       max ((snd characters).velocity.y - gravity) (snd characters).speed * fallconstant/2
+                     if !gravitycounter2 mod 4 = 0 then
+                       max ((snd characters).velocity.y - gravity) ((snd characters).speed * fallconstant/2)
                      else
                        (snd characters).velocity.y
                  else (snd characters).velocity.y
@@ -127,7 +130,7 @@ let update () =
     ((fst characters).stun <- (fst characters).stun -1 ;
     (fst characters).velocity.x )
     else
-      if !momentumcounter mod 20 = 0 then
+      if !momentumcounter mod 10 = 0 then
         0
       else
       (fst characters).velocity.x in
@@ -135,7 +138,7 @@ let update () =
     ((snd characters).stun <- (snd characters).stun -1 ;
     (snd characters).velocity.x )
     else
-      if !momentumcounter2 mod 20 = 0 then
+      if !momentumcounter2 mod 10 = 0 then
         0
       else
       (snd characters).velocity.x in
@@ -182,7 +185,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=(-1)*((snd characters).percent/4);
                                           y=0};
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       else
         ();
@@ -200,7 +203,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=(-1)*((fst characters).percent/4);
                                           y=0};
-        stun (fst characters) 60;
+        stun (fst characters) knockbackstun;
         ())
       else
         ();
@@ -219,7 +222,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=(snd characters).percent/4;
                                           y=0};
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       else
         ();
@@ -237,7 +240,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=(fst characters).percent/4;
                                           y=0};
-        stun (fst characters) 60;
+        stun (fst characters) knockbackstun;
         ())
       else
         ();
@@ -264,7 +267,7 @@ let process_attack (a: attack) (i: int) : unit =
       let attack_box2 = (b2p1,b2p2) in
       let attack_box3 = (b3p1,b3p2) in
       (* Hitting only left or right boxes sends enemy at 30 degree angle.
-       * Hitting left + middle or right + middle sends enemy at 60 degree angle.
+       * Hitting left + middle or right + middle sends enemy at knockbackstun degree angle.
        * Hitting only middle or all three sends enemy straight up. *)
 
       (*If the attack hits all three boxes *)
@@ -277,7 +280,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=0;
            y=(snd characters).percent/4};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       (*If the attack hits the left and middle box *)
       else if collide attack_box1 (snd characters).hitbox &&
@@ -288,7 +291,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=(-1)*((snd characters).percent/4);
            y=(((snd characters).percent/4)*173)/100};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       (*If the attack hits the middle and right box *)
       else if collide attack_box2 (snd characters).hitbox &&
@@ -299,7 +302,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=(snd characters).percent/4;
            y=(((snd characters).percent/4)*173)/100};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       (*If the attack hits the left box only *)
       else if collide attack_box1 (snd characters).hitbox then
@@ -309,7 +312,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=(-1)*((((snd characters).percent/4)*173)/100);
            y=(snd characters).percent/4};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       (*If the attack hits the right box only *)
       else if collide attack_box3 (snd characters).hitbox then
@@ -319,7 +322,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=(((snd characters).percent/4)*173)/100;
            y=(snd characters).percent/4};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       (*If the attack hits the middle box only *)
       else if collide attack_box2 (snd characters).hitbox then
@@ -329,7 +332,7 @@ let process_attack (a: attack) (i: int) : unit =
           {x=0;
            y=(snd characters).percent/4};
         (snd characters).air <- true;
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       else
         ();
@@ -350,7 +353,7 @@ let process_attack (a: attack) (i: int) : unit =
         change_velocity (fst characters) {x=0;
                                           y=(fst characters).percent/4};
         (fst characters).air <- true;
-        stun (fst characters) 60;
+        stun (fst characters) knockbackstun;
         ())
       else
         ();
@@ -378,7 +381,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=0;
                                           y=(-1)*((snd characters).percent/4)};
-        stun (snd characters) 60;
+        stun (snd characters) knockbackstun;
         ())
       else
         ();
@@ -398,7 +401,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=0;
                                           y=(-1)*((snd characters).percent/4)};
-        stun (fst characters) 60;
+        stun (fst characters) knockbackstun;
         ())
       else
         ();
@@ -476,18 +479,20 @@ let process_move (m: move) (i: int) : unit =
         () in ()
 
 let airesponse () =
-  let r = Ai.execute_response_to_state (fst characters) (snd characters) in
-  match r with
-  | "ML" -> process_move MLeft 1
-  | "MD" -> process_move MDown 1
-  | "MU" -> process_move MUp 1
-  | "MR" -> process_move MRight 1
-  | "AR" -> process_attack Right 1
-  | "AU" -> process_attack Up 1
-  | "AD" -> process_attack Down 1
-  | "AL" -> process_attack Left 1
-  | "" -> ()
-  | _ -> failwith "not correct input"
+  if !aicounter mod 2 = 0 then
+    let r = Ai.execute_response_to_state (fst characters) (snd characters) in
+    match r with
+    | "ML" -> process_move MLeft 1
+    | "MD" -> process_move MDown 1
+    | "MU" -> process_move MUp 1
+    | "MR" -> process_move MRight 1
+    | "AR" -> process_attack Right 1
+    | "AU" -> process_attack Up 1
+    | "AD" -> process_attack Down 1
+    | "AL" -> process_attack Left 1
+    | "" -> ()
+    | _ -> failwith "not correct input"
+  else ()
 
 
 let rec tickprocessor () = (**need to call process attack*)
@@ -507,7 +512,7 @@ let rec tickprocessor () = (**need to call process attack*)
       ignore(Thread.create (fun x -> let _ = List.iter process x in update () ; airesponse ()) !newinputs) in
    newinputs := [] ;
    ignore(Thread.create (Gui.draw_characters) characters);
-   Thread.delay 0.017 ;
+   Thread.delay 0.02 ;
    tickprocessor ()
 
 let rec input_loop () =
@@ -522,3 +527,6 @@ let start_engine () =
   Thread.join (Thread.create tickprocessor ())
 
 let _ = start_engine ()
+
+
+
