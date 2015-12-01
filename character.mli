@@ -6,33 +6,25 @@ type point = {
   y: int
 }
 type rect = point * point
-type attack = int * int
-type attacks = {
-  jab:    attack;
-  fsmash: attack;
-  usmash: attack;
-  dsmash: attack;
-  nspec:  attack;
-  fspec:  attack;
-  uspec:  attack;
-  dspec:  attack
-}
+type attack = Up | Down | Left | Right
 
 type t = {
-  mutable hitbox:   rect;
-  mutable percent:  int;
-  mutable stun:     int;
-  mutable air:      bool;
-  mutable velocity: point;
-  mutable jumps:    int;
-  mutable lives:    int;
-  attacks:  attacks;
+  mutable hitbox:         rect;
+  mutable percent:        int;
+  mutable stun:           int;
+  mutable air:            bool;
+  mutable velocity:       point;
+  mutable jumps:          int;
+  mutable lives:          int;
+  mutable current_attack: attack option;
   range:    int;
   speed:    int;
   weight:   int;
 }
 
 type guy = Light | Medium | Heavy
+
+val attack_length : int
 
 (**
  * [get_width g] returns the width of character g
@@ -59,7 +51,9 @@ val set_position : t -> point -> unit
 (**
  * [attack x] simulates an attack by the character x.
  *)
-val attack : t -> unit
+val start_attack : t -> attack -> unit
+
+val stop_attack : t -> unit
 
 (**
  * [stun x len] stuns updates the stun field for character x to len.

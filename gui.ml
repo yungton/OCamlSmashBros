@@ -15,6 +15,7 @@ let count = ref 0
 let og_stage = Array.make_matrix stageh stagew white
 
 let prev_pos = (ref {x=250;y=102}, ref {x=750;y=102})
+let prev_attacks = (ref None, ref None)
 
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
@@ -27,6 +28,12 @@ let copy_matrix m1 m2 =
       m1.(row).(col) <- m2.(row).(col)
     done
   done
+
+let draw_line (x1,y1) (x2,y2) =
+  let (xi,yi) = current_point() in
+  moveto x1 y1;
+  lineto x2 y2;
+  moveto xi yi
 
 let portion_of_og_stage x y w h =
   let result = Array.make_matrix h w white in
@@ -101,35 +108,116 @@ let draw_status_box pnum col (x,y) percent =
   moveto xi xy;
   set_color orig_col
 
-let draw_guy x y w h =
-  let (xi,yi) = current_point() in
+let draw_neutral_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
+  (* Head *)
   fill_circle xb (y+h-w/2) (w/2);
+
   set_line_width 5;
-  moveto xb (y+h-5);
-  lineto xb ylb;
-  moveto xb yab;
-  lineto x (yab-w/2);
-  moveto xb yab;
-  lineto (x+w) (yab-w/2);
-  moveto xb ylb;
-  lineto x y;
-  moveto xb ylb;
-  lineto (x+w) y;
-  moveto xi yi
 
-let draw_body x y w h =
-  fill_circle (x+w/4) (y+w/4) (w/4) ;
-  fill_circle (x+w*3/4) (y+w/4) (w/4) ;
-  fill_rect (x+w/3) (y+w/6) (w/3) (h-w/2);
-  fill_circle (x+w/2) (y+h-w/3) (w/6)
+  (* Body *)
+  draw_line (xb, y+h-5) (xb, ylb);
 
-let draw_char egg c f col =
+  (* Arms *)
+  draw_line (xb, yab) (x, yab-w/2);
+  draw_line (xb, yab) (x+w, yab-w/2);
+
+  (* Legs *)
+  draw_line (xb, ylb) (x, y);
+  draw_line (xb, ylb) (x+w, y)
+
+let draw_right_guy x y w h =
+  let xb = x+w/2 in
+  let yab = y+h-w and ylb = y+(min w (h/4)) in
+  (* Head *)
+  fill_circle xb (y+h-w/2) (w/2);
+
+  set_line_width 5;
+
+  (* Body *)
+  draw_line (xb, y+h-5) (xb, ylb);
+
+  (* Arms *)
+  draw_line (xb, yab) (x+w, yab-10);
+  draw_line (xb, yab) (x+w, yab+5);
+
+  (* Legs *)
+  draw_line (xb, ylb) (x, y);
+  draw_line (xb, ylb) (x+w, y)
+
+let draw_left_guy x y w h =
+  let xb = x+w/2 in
+  let yab = y+h-w and ylb = y+(min w (h/4)) in
+  (* Head *)
+  fill_circle xb (y+h-w/2) (w/2);
+
+  set_line_width 5;
+
+  (* Body *)
+  draw_line (xb, y+h-5) (xb, ylb);
+
+  (* Arms *)
+  draw_line (xb, yab) (x, yab-10);
+  draw_line (xb, yab) (x, yab+5);
+
+  (* Legs *)
+  draw_line (xb, ylb) (x, y);
+  draw_line (xb, ylb) (x+w, y)
+
+let draw_up_guy x y w h =
+  let xb = x+w/2 in
+  let yab = y+h-w and ylb = y+(min w (h/4)) in
+  (* Head *)
+  fill_circle xb (y+h-w/2) (w/2);
+
+  set_line_width 5;
+
+  (* Body *)
+  draw_line (xb, y+h-5) (xb, ylb);
+
+  (* Arms *)
+  draw_line (xb, yab) (x, yab+w/2);
+  draw_line (xb, yab) (x+w, yab+w/2);
+
+  (* Legs *)
+  draw_line (xb, ylb) (x, y);
+  draw_line (xb, ylb) (x+w, y)
+
+let draw_down_guy x y w h =
+  let xb = x+w/2 in
+  let yab = y+h-w and ylb = y+(min w (h/4)) in
+  (* Head *)
+  fill_circle xb (y+h-w/2) (w/2);
+
+  set_line_width 5;
+
+  (* Body *)
+  draw_line (xb, y+h-5) (xb, ylb);
+
+  (* Arms *)
+  draw_line (xb, yab) (x+10, yab-w/2);
+  draw_line (xb, yab) (x+w-10, yab-w/2);
+
+  (* Legs *)
+  draw_line (xb, ylb) (x+10, y);
+  draw_line (xb, ylb) (x+w-10, y)
+
+let draw_for_attack = function
+  | None       -> draw_neutral_guy
+  | Some Up    -> draw_up_guy
+  | Some Down  -> draw_down_guy
+  | Some Left  -> draw_left_guy
+  | Some Right -> draw_right_guy
+
+let draw_for_state c = draw_for_attack c.current_attack
+
+let draw_char c f1 f2 col =
   let orig_col = foreground in
   set_color (color_from_hex bg_hex);
-  let drawf = if egg then draw_body else draw_guy in
-  drawf !(f prev_pos).x !(f prev_pos).y (get_width c) (get_height c);
+  let drawf = draw_for_state c in
+  let drawe = draw_for_attack !(f1 prev_attacks) in 
+  drawe !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   let cl = if c.stun > 0 then green else col in
   set_color cl;
   drawf (fst c.hitbox).x 
@@ -138,16 +226,15 @@ let draw_char egg c f col =
         (get_height c);
   set_color orig_col
 
-(* Set this boolean to true if you want an easter egg ;) *)
-let draw_player = draw_char false
-
 let draw_characters (c1,c2) =
   incr count;
   draw_stage_top();
-  draw_player c1 fst red;
-  draw_player c2 snd blue;
+  draw_char c1 fst fst red;
+  draw_char c2 snd snd blue;
   fst prev_pos := fst (c1.hitbox);
   snd prev_pos := fst (c2.hitbox);
+  fst prev_attacks := c1.current_attack;
+  snd prev_attacks := c2.current_attack;
   draw_status_box 1 red (220,10) c1.percent;
   draw_status_box 2 blue ((size_x()-320),10) c2.percent;
 
