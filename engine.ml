@@ -180,7 +180,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (snd characters) {x=(-1)*((snd characters).percent/2);
+        change_velocity (snd characters) {x=(-1)*((snd characters).percent/4);
                                           y=0};
         stun (snd characters) 60;
         ())
@@ -198,7 +198,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (fst characters) {x=(-1)*((fst characters).percent/2);
+        change_velocity (fst characters) {x=(-1)*((fst characters).percent/4);
                                           y=0};
         stun (fst characters) 60;
         ())
@@ -217,7 +217,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (snd characters).hitbox then (*If the attack hits*)
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (snd characters) {x=(snd characters).percent/2;
+        change_velocity (snd characters) {x=(snd characters).percent/4;
                                           y=0};
         stun (snd characters) 60;
         ())
@@ -235,7 +235,7 @@ let process_attack (a: attack) (i: int) : unit =
       if collide attack_box (fst characters).hitbox then (*If the attack hits*)
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
-        change_velocity (fst characters) {x=(fst characters).percent/2;
+        change_velocity (fst characters) {x=(fst characters).percent/4;
                                           y=0};
         stun (fst characters) 60;
         ())
@@ -275,7 +275,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
           {x=0;
-           y=(snd characters).percent/2};
+           y=(snd characters).percent/4};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -285,8 +285,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
-          {x=(-1)*((snd characters).percent/2);
-           y=(((snd characters).percent/2)*173)/100};
+          {x=(-1)*((snd characters).percent/4);
+           y=(((snd characters).percent/4)*173)/100};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -296,8 +296,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
-          {x=(snd characters).percent/2;
-           y=(((snd characters).percent/2)*173)/100};
+          {x=(snd characters).percent/4;
+           y=(((snd characters).percent/4)*173)/100};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -306,8 +306,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
-          {x=(-1)*((((snd characters).percent/2)*173)/100);
-           y=(snd characters).percent/2};
+          {x=(-1)*((((snd characters).percent/4)*173)/100);
+           y=(snd characters).percent/4};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -316,8 +316,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
-          {x=(((snd characters).percent/2)*173)/100;
-           y=(snd characters).percent/2};
+          {x=(((snd characters).percent/4)*173)/100;
+           y=(snd characters).percent/4};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -327,7 +327,7 @@ let process_attack (a: attack) (i: int) : unit =
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters)
           {x=0;
-           y=(snd characters).percent/2};
+           y=(snd characters).percent/4};
         (snd characters).air <- true;
         stun (snd characters) 60;
         ())
@@ -348,7 +348,7 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=0;
-                                          y=(fst characters).percent/2};
+                                          y=(fst characters).percent/4};
         (fst characters).air <- true;
         stun (fst characters) 60;
         ())
@@ -377,7 +377,7 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=0;
-                                          y=(-1)*((snd characters).percent/2)};
+                                          y=(-1)*((snd characters).percent/4)};
         stun (snd characters) 60;
         ())
       else
@@ -397,7 +397,7 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=0;
-                                          y=(-1)*((snd characters).percent/2)};
+                                          y=(-1)*((snd characters).percent/4)};
         stun (fst characters) 60;
         ())
       else
