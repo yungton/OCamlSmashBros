@@ -186,7 +186,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=(-1)*((snd characters).percent/4);
-                                          y=0};
+                                          y=(((snd characters).percent/4)*35)/100};
+        (snd characters).air <- true;
         stun (snd characters) knockbackstun;
         ())
       else
@@ -204,7 +205,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=(-1)*((fst characters).percent/4);
-                                          y=0};
+                                          y=(((fst characters).percent/4)*35)/100};
+        (fst characters).air <- true;
         stun (fst characters) knockbackstun;
         ())
       else
@@ -223,7 +225,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (snd characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (snd characters) {x=(snd characters).percent/4;
-                                          y=0};
+                                          y=(((snd characters).percent/4)*35)/100};
+        (snd characters).air <- true;
         stun (snd characters) knockbackstun;
         ())
       else
@@ -241,7 +244,8 @@ let process_attack (a: attack) (i: int) : unit =
         (get_hit (fst characters) 10;
         (* This x value should be a function of dmg and attack strength *)
         change_velocity (fst characters) {x=(fst characters).percent/4;
-                                          y=0};
+                                          y=(((fst characters).percent/4)*35)/100};
+        (fst characters).air <- true;
         stun (fst characters) knockbackstun;
         ())
       else
