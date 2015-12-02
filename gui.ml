@@ -108,6 +108,23 @@ let draw_status_box pnum col (x,y) percent =
   moveto xi xy;
   set_color orig_col
 
+let bound n l u = match n with
+  | x when x > u -> u
+  | x when x < l -> l
+  | x -> x
+
+let draw_out_circle x y w h =
+  let circle_radius = 10 in
+  let circle_inset  = 20 in
+  if x + w < 0 then
+  draw_circle circle_inset (bound y circle_inset (stageh-circle_inset)) circle_radius
+  else if x > stagew then
+  draw_circle (stagew - circle_inset) (bound y circle_inset (stageh-circle_inset)) circle_radius
+  else if y + h < 0 then
+  draw_circle (bound x circle_inset (stagew-circle_inset)) circle_inset circle_radius
+  else if y > stageh then
+  draw_circle (bound x circle_inset (stagew-circle_inset)) (stageh - circle_inset) circle_radius
+
 let draw_neutral_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -217,9 +234,14 @@ let draw_char c f1 f2 col =
   set_color (color_from_hex bg_hex);
   let drawf = draw_for_state c in
   let drawe = draw_for_attack !(f1 prev_attacks) in 
+  draw_out_circle !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   drawe !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   let cl = if c.stun > 0 then green else col in
   set_color cl;
+  draw_out_circle (fst c.hitbox).x 
+        (fst c.hitbox).y 
+        (get_width c)
+        (get_height c);
   drawf (fst c.hitbox).x 
         (fst c.hitbox).y 
         (get_width c)
