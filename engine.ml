@@ -3,7 +3,6 @@ open Character
 (**implement 3 lives, resets, replay, ai attack in air, down smash on ground out,
   evasion in air
    *)
-type attack = Left | Right | Down | Up | Neutral
 
 type move = MLeft | MRight | MDown | MUp
 
@@ -125,7 +124,8 @@ let update () =
                  else (snd characters).velocity.y
                else 0 in
   let newvx1 = if (fst characters).stun > 0 then
-    ((fst characters).stun <- (fst characters).stun -1 ;
+    ((if (fst characters).stun - 1 = 0 then stop_attack (fst characters) else ()) ;
+    (fst characters).stun <- (fst characters).stun -1 ;
     (fst characters).velocity.x )
     else
       if !momentumcounter mod 10 = 0 then
@@ -133,7 +133,8 @@ let update () =
       else
       (fst characters).velocity.x in
   let newvx2 = if (snd characters).stun > 0 then
-    ((snd characters).stun <- (snd characters).stun -1 ;
+    ((if (snd characters).stun - 1 = 0 then stop_attack (snd characters) else ()) ;
+    (snd characters).stun <- (snd characters).stun -1 ;
     (snd characters).velocity.x )
     else
       if !momentumcounter2 mod 10 = 0 then
@@ -171,6 +172,7 @@ let collide (r1: rect) (r2: rect) : bool =
 let process_attack (a: attack) (i: int) : unit =
   let ch = if i = 0 then  fst characters else snd characters in
   let _ = if ch.stun > 0 then () else
+  start_attack ch a;
   match a with
   | Left ->
     if i = 0 then
@@ -411,7 +413,7 @@ let process_attack (a: attack) (i: int) : unit =
         ();
       (* Attacking character is also stunned *)
       stun (snd characters) 10)
-  | _ -> () in ()
+      in ()
 
 let process_move (m: move) (i: int) : unit =
   let ch = if i = 0 then  fst characters else snd characters in
