@@ -131,10 +131,27 @@ let collide (r1: rect) (r2: rect) : bool =
   x_collide && y_collide
 
 let checkfordeath ch =
-  if collide ({x=(-10000);y=1000},{x=100000;y=1000000}) ch.hitbox || collide ({x=(-100000);y=(-100000)},{x=100000;y=(-150)}) ch.hitbox
-     || collide ({x=(-10000);y=(-10000)},{x=(-500);y=10000}) ch.hitbox || collide ({x=1500;y=(-10000)},{x=10000;y=100000}) ch.hitbox then
-    (reset ch ; if ch.lives = 0 then continue := false else ())
-  else ()
+  let i = if (fst !characters)= ch then 1 else 2 in
+  if collide ({x=(-10000);y=800},{x=100000;y=1000000}) ch.hitbox then
+    let x = if (fst ch.hitbox).x > 1000 then 1000 else
+              if (fst ch.hitbox).x < 0 then 0 else
+              (fst ch.hitbox).x in
+    (Gui.start_blast x 600 true false i ; reset ch ; if ch.lives = 0 then continue := false else ())
+  else
+    if collide ({x=(-100000);y=(-100000)},{x=100000;y=(-150)}) ch.hitbox then
+      let x = if (fst ch.hitbox).x > 1000 then 1000 else
+              if (fst ch.hitbox).x < 0 then 0 else
+              (fst ch.hitbox).x in
+      (Gui.start_blast x 0 true true i ; reset ch ; if ch.lives = 0 then continue := false else ())
+    else
+      if collide ({x=(-10000);y=(-10000)},{x=(-400);y=10000}) ch.hitbox then
+        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; reset ch ; if ch.lives = 0 then continue := false else ())
+    else
+      if collide ({x=1400;y=(-10000)},{x=10000;y=100000}) ch.hitbox then
+        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; reset ch ; if ch.lives = 0 then continue := false else ())
+      else
+        ()
+
 
 let update () =
   let newpos1test = {x=(fst !characters).velocity.x + (fst ((fst !characters).hitbox)).x;
@@ -445,7 +462,7 @@ let process_move (m: move) (i: int) : unit =
         () in ()
 
 let airesponse () =
-  if !aicounter mod 1 = 0 then
+  if !aicounter mod 5 = 0 then
     let r = Ai.execute_response_to_state (fst !characters) (snd !characters) in
     match r with
     | "ML" -> process_move MLeft 1
@@ -496,7 +513,7 @@ let rec start_engine () =
   replay ()
 
 and replay () =
-  (**call gui finish method here, 'y' for yes, 'n' for no*)
+  Gui.draw_end () ;
   let newchar = read_key () in
   match newchar with
   | 'y' ->
