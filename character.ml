@@ -33,23 +33,23 @@ let attributes_for_guy = function
   | Light -> {
       width  = 30;
       height = 75;
-      speed  = 5;
+      speed  = 6;
       weight = 1;
       range  = 1
     }
   | Medium -> {
       width  = 50;
       height = 100;
-      speed  = 3;
+      speed  = 5;
       weight = 2;
-      range  = 2
+      range  = 4
     }
   | Heavy -> {
       width  = 75;
       height = 125;
-      speed  = 2;
+      speed  = 4;
       weight = 3;
-      range  = 3
+      range  = 6
     }
 
 let attack_length = 10
@@ -62,9 +62,9 @@ let hitbox_at_point c p =
   let width = get_width c and height = get_height c in
   (p, { x=p.x+width; y = p.y+height })
 
-let create (g:guy) p = 
-  let atts = attributes_for_guy g in 
-  { 
+let create (g:guy) p =
+  let atts = attributes_for_guy g in
+  {
     hitbox = (p, {x=p.x+atts.width; y = p.y+atts.height});
     percent = 0;
     stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
@@ -94,4 +94,10 @@ let get_hit c dmg = c.percent <- c.percent + dmg;
 
 let change_velocity c v = c.velocity <- v
 
-let reset c = c.lives <- c.lives - 1; (* need to change hitbox too*)
+let reset c =
+  c.lives <- c.lives - 1;
+  set_position c {x=475;y=400} ;
+  change_velocity c {x=0;y=0} ;
+  c.percent <- 0
+
+
