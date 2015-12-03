@@ -45,7 +45,7 @@ let attributes_for_guy = function
       range  = 4
     }
   | Heavy -> {
-      width  = 75;
+      width  = 60;
       height = 125;
       speed  = 4;
       weight = 3;

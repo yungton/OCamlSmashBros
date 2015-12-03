@@ -2,6 +2,8 @@ open Graphics
 open Character
 
 let bg_hex = "0x0C3D6F"
+let p1_hex = "0xCC3300"
+let p2_hex = "0x339933"
 let num_stars = 150
 let star_size = 1
 let planet_radius = 150
@@ -17,10 +19,35 @@ let og_stage = Array.make_matrix stageh stagew white
 let prev_pos = (ref {x=250;y=102}, ref {x=750;y=102})
 let prev_attacks = (ref None, ref None)
 
+type blast_info = {
+  x :      int;
+  y :      int;
+  vert :   bool;
+  up :     bool;
+  num:     int;
+  mutable frames : int;
+}
+
+let blast_length = 60
+
+let create_blast_info x y v u n= {
+  x = x;
+  y = y;
+  vert = v;
+  up = u;
+  num = n;
+  frames = blast_length;
+}
+
+let blasts = ref []
+
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
   let r = c / 65536 and g = c / 256 mod 256 and b = c mod 256 in
   rgb r g b
+
+let p1_col = color_from_hex (p1_hex)
+let p2_col = color_from_hex (p2_hex)
 
 let copy_matrix m1 m2 =
   for row=0 to (Array.length m1)-1 do
@@ -89,12 +116,9 @@ let draw_background () =
   set_color col;
   fill_rect 0 0 (size_x()) (size_y());
   for i=0 to num_stars do draw_star() done;
-  (* draw_planet false yellow yellow; *)
-  (* draw_earth(); *)
-  (* draw_sun(); *)
   set_color orig_col
 
-let draw_status_box pnum col (x,y) percent = 
+let draw_status_box pnum col (x,y) c = 
   let orig_col = foreground in
   let (xi, xy) = current_point() in
   set_color col;
@@ -104,7 +128,9 @@ let draw_status_box pnum col (x,y) percent =
   moveto (x+25) (y+55);
   draw_string ("Player " ^ (string_of_int pnum));
   moveto (x+30) (y+30);
-  draw_string ((string_of_int percent) ^ "%");
+  draw_string ((string_of_int c.percent) ^ "%");
+  moveto (x+30) (y+10);
+  draw_string ("Lives: " ^ (string_of_int c.lives));
   moveto xi xy;
   set_color orig_col
 
@@ -229,15 +255,15 @@ let draw_for_attack = function
 
 let draw_for_state c = draw_for_attack c.current_attack
 
-let draw_char c f1 f2 col =
+let draw_char c f1 (f2: 'a*'a -> 'a) col =
   let orig_col = foreground in
   set_color (color_from_hex bg_hex);
   let drawf = draw_for_state c in
   let drawe = draw_for_attack !(f1 prev_attacks) in 
   draw_out_circle !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   drawe !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
-  let cl = if c.stun > 0 then green else col in
-  set_color cl;
+  (* let cl = if c.stun > 0 then green else col in *)
+  set_color col;
   draw_out_circle (fst c.hitbox).x 
         (fst c.hitbox).y 
         (get_width c)
@@ -248,26 +274,79 @@ let draw_char c f1 f2 col =
         (get_height c);
   set_color orig_col
 
+(** Draws a blast with a base centered at (x,y). 
+  * [vertical] = "the blast should be drawn tall, not wide"
+  * [up]       = "the blast should be drawn up if veritcal and left otherwise"*)
+let draw_blast info erase =
+  let min_width  = 30  and var_width  = 70 in
+  let min_height = 200 and var_height = 70 in
+  let width  = min_width  + Random.int(var_width) in
+  let height = min_height + Random.int(var_height) in
+
+  let max_width = min_width + var_width in
+  let max_height = min_height + var_height in
+
+  let (w, mw)  = if info.vert then (width, max_width) else (height, max_height) in
+  let (h, mh)  = if info.vert then (height, max_height) else (width, max_width) in
+  let (xr, mxr) = match info.vert, info.up with
+  | true, true -> (info.x - w/2, info.x - mw/2)
+  | true, false -> (info.x - w/2, info.x - mw/2)
+  | false, true -> (info.x, info.x)
+  | false, false -> (info.x - w, info.x - mw) in
+
+  let (yr, myr) = match info.vert, info.up with
+  | true, true -> (info.y, info.y)
+  | true, false -> (info.y - h, info.y - mh)
+  | false, true -> (info.y - h/2, info.y - mh/2)
+  | false, false -> (info.y - h/2, info.y - mh/2) in 
+
+  let col = foreground in
+  set_color (color_from_hex bg_hex);
+  fill_rect mxr myr mw mh;
+  let player_col = if info.num = 1 then p1_col else p2_col in
+  set_color player_col;
+  (if erase then () else fill_rect xr yr w h);
+  set_color col
+
+
+let start_blast x y vert up player =
+  let info = create_blast_info x y vert up player in
+  let old_blasts = !blasts in
+  blasts := info :: old_blasts
+
+let animate_blast () =
+  let rec helper acc = function
+  | [] -> acc
+  | b::bs -> 
+    draw_blast b false;
+    b.frames <- b.frames - 1;
+    let new_acc = if b.frames = 0 then (draw_blast b true; acc) else b::acc in
+    helper new_acc bs 
+  in
+
+  blasts := helper [] !blasts
+
 let draw_characters (c1,c2) =
   incr count;
   draw_stage_top();
-  draw_char c1 fst fst red;
-  draw_char c2 snd snd blue;
+  animate_blast ();
+  draw_char c1 fst fst p1_col;
+  draw_char c2 snd snd p2_col;
   fst prev_pos := fst (c1.hitbox);
   snd prev_pos := fst (c2.hitbox);
   fst prev_attacks := c1.current_attack;
   snd prev_attacks := c2.current_attack;
-  draw_status_box 1 red (220,10) c1.percent;
-  draw_status_box 2 blue ((size_x()-320),10) c2.percent;
+  draw_status_box 1 p1_col (220,10) c1;
+  draw_status_box 2 p2_col ((size_x()-320),10) c2;
 
   if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
-let draw cs = 
+let draw (c1,c2) = 
   draw_background();
   draw_stage();
-  draw_characters cs;
-  draw_status_box 1 red (220,10) (fst cs).percent;
-  draw_status_box 2 blue ((size_x()-320),10) (snd cs).percent
+  draw_characters (c1,c2);
+  draw_status_box 1 red (220,10) c1;
+  draw_status_box 2 blue ((size_x()-320),10) c2
   (* copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh)) *)
 
 let setup_window () = 
