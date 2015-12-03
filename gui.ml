@@ -341,6 +341,15 @@ let draw_characters (c1,c2) =
 
   if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
+let draw_end () = 
+  let (xi, yi) = current_point() in
+  let col = foreground in
+  moveto (stagew/2) (stageh/2);
+  set_color white;
+  draw_string "GAME";
+  set_color col;
+  moveto xi yi
+
 let draw (c1,c2) = 
   draw_background();
   draw_stage();

@@ -31,3 +31,5 @@ val draw_characters : Character.t * Character.t -> unit
   * stops when the blast ends and the blast erases itself.
   * *)
 val start_blast : int -> int -> bool -> bool -> int -> unit
+
+val draw_end : unit -> unit
