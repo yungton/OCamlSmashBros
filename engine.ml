@@ -199,7 +199,7 @@ let update () =
 let process_attack (a: attack) (i: int) : unit =
   let (ch,ch2) = if i = 0 then (fst !characters,snd !characters)
                  else (snd !characters,fst !characters) in
-  let weight_modifier = 150 - (25*ch2.weight) in
+  let weight_modifier = 150 - (35*ch2.weight) in
   let _ = if ch.stun > 0 then () else
   start_attack ch a;
   match a with
@@ -352,7 +352,7 @@ let process_attack (a: attack) (i: int) : unit =
     let attack_box = (newp1,newp2) in
     if collide attack_box ch2.hitbox then (*If the attack hits*)
       (get_hit ch2 10;
-      if ch.air = true then
+      if ch.air = true || ch2.air = true then
         (* This x value should be a function of dmg and attack strength *)
         change_velocity ch2 {x=0;
                              y=(-1)*(ch2.percent/4)*weight_modifier/100}
