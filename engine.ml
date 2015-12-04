@@ -1,7 +1,6 @@
 open Graphics
 open Character
-(**ai attack off stage, down smash on ground out, gui methods for replay,countdown,
-  attack needs weight consideration, mess with ranges, clean code
+(**ai attack off stage, down smash on ground out, gui methods for replay,countdown, mess with ranges
    *)
 
 type move = MLeft | MRight | MDown | MUp
@@ -12,6 +11,9 @@ let fallconstant = -2
 
 let gravity = 1
 let knockbackstun = 40
+
+(**These counters let us control for how many frames certain effects last when
+   we mod them.*)
 
 let aicounter = ref 0
 
@@ -34,6 +36,7 @@ let newinputs = ref []
 
 let _ = Random.self_init ()
 
+(** [chargen ()] generates a pair of random character types.*)
 let chargen () =
   match (Random.int 3,Random.int 3) with
   | (0,0) -> (Light, Light)
@@ -56,6 +59,9 @@ let c2 = ref (create rand2 {x=stageright-100;y=stagetop})
 let ch1width = get_width (!c1)
 let ch2width = get_width (!c2)
 
+(**[stagecollision pos1 pos2] calculates if the characters at positions pos1 and pos2
+ hit the stage and processes the changes that need to made to the characters as
+a result. It returns unit. Positions are of type point from character.*)
 let stagecollision pos1 pos2 =
   let topdiff1 = pos1.y - stagetop in
   let topdiff2 = pos2.y - stagetop in
@@ -108,6 +114,8 @@ let stagecollision pos1 pos2 =
      else
      ()
 
+(**[collide r1 r2] returns true if r1 and r2 overlap, false if not.
+ r1 and r2 are of type rect from character. *)
 let collide (r1: rect) (r2: rect) : bool =
   let r1p1 = fst r1 in
   let r1p2 = snd r1 in
@@ -131,6 +139,9 @@ let collide (r1: rect) (r2: rect) : bool =
     else false in
   x_collide && y_collide
 
+(**[checkfordeath ch] checks if a character has been hit out of bounds of the stage
+and processes their death if they are out of bounds. If a player loses all of their
+lives, the game ends. This returns unit. *)
 let checkfordeath ch =
   let i = if (!c1)= ch then 1 else 2 in
   if collide ({x=(-10000);y=800},{x=100000;y=1000000}) ch.hitbox then
@@ -153,7 +164,9 @@ let checkfordeath ch =
       else
         ()
 
-
+(**[update ()] processes the change in position and velocity that occurs for each
+character at every frame. This takes into account gravity, stage collisions,
+momentum, and stuns. This returns unit.*)
 let update () =
   let newpos1test = {x=(!c1).velocity.x + (fst ((!c1).hitbox)).x;
      y=(!c1).velocity.y + (fst ((!c1).hitbox)).y} in
@@ -214,6 +227,9 @@ let update () =
   let (a,b,c,d) = !lastmove in
   lastmove := (a,b-1,c,d-1)
 
+(**[process_attack attk i] checks if an attack attk from player i will hit the
+opposing player. If it does, the opposing player is stunned and knocked back, among other effects.
+attk is of type attack from the character module. This returns type unit.*)
 let process_attack (a: attack) (i: int) : unit =
   let (ch,ch2) = if i = 0 then (!c1,!c2)
                  else (!c2,!c1) in
@@ -394,6 +410,8 @@ let process_attack (a: attack) (i: int) : unit =
     stun ch 10
   in ()
 
+(**[process_move move i] checks if a move move is valid and processes the changes to
+the velocity of player i that result. move is of type move. *)
 let process_move (m: move) (i: int) : unit =
   let ch = if i = 0 then  !c1 else !c2 in
   let _ = if ch.stun > 0 then () else
@@ -463,6 +481,9 @@ let process_move (m: move) (i: int) : unit =
       else
         () in ()
 
+(**[airesponse ()] generates responses from the ai in reaction to the current game
+state and processes the attacks and moves for player 2. This is done by calling a
+function in the Ai module. This returns unit. *)
 let airesponse () =
   if !aicounter mod 5 = 0 then
     let r = Ai.execute_response_to_state (!c1) (!c2) in
@@ -479,7 +500,9 @@ let airesponse () =
     | _ -> failwith "not correct input"
   else ()
 
-
+(**[tickprocessor ()] maintains the frame rate of the game at 60 frames per second,
+processes player inputs, generates ai responses, draws rhe current state by calling Gui methods,
+ and processes character updates once per frame. This returns unit.*)
 let rec tickprocessor () = (**need to call process attack*)
    (* let inputs = List.fold_right (fun x acc -> acc ^ (Char.escaped x)) !newinputs "" in *)
    let process x =
@@ -500,11 +523,18 @@ let rec tickprocessor () = (**need to call process attack*)
    Thread.delay 0.02 ;
    if !continue then tickprocessor () else ()
 
+(**[input_loop ()] continuously reads inputs from the keyboard and adds them to a
+list of inputs to be processed at the next frame. This returns unit.*)
 let rec input_loop () =
-  let newchar = read_key () in
-  newinputs := !newinputs @ [newchar] ;
-  if !continue then input_loop () else ()
+  if !continue then
+    let newchar = read_key () in
+    newinputs := !newinputs @ [newchar] ;
+    input_loop ()
+  else ()
 
+(**[start_engine ()] starts the game by calling intitial Gui draw methods, then
+starts the loops to process inputs and game updates. Once game is finished, offers
+player the option to replay or quit the game. This returns unit.*)
 let rec start_engine () =
   continue := true ;
   let t = Thread.create input_loop () in
