@@ -243,8 +243,8 @@ let process_attack (a: attack) (i: int) : unit =
     (* Get a box that has width range and that is adjacent to the left of the character *)
     let p1 = (fst ch.hitbox) in (*Bottom left point of hitbox *)
     let p2 = (snd ch.hitbox) in  (*Top right point of hitbox *)
-    let newp1 = {x=p1.x - ch.range;y=p1.y} in
-    let newp2 = {x=p1.x;y=p2.y} in
+    let newp1 = {x=p1.x;y=p1.y} in
+    let newp2 = {x=(p1.x+p2.x)/2;y=p2.y} in
     let attack_box = (newp1,newp2) in
     if collide attack_box ch2.hitbox then (*If the attack hits*)
       (get_hit ch2 10;
@@ -263,8 +263,8 @@ let process_attack (a: attack) (i: int) : unit =
     (* Get a box that has width range and that is adjacent to the left of the character *)
     let p1 = (fst ch.hitbox) in (*Bottom left point of hitbox *)
     let p2 = (snd ch.hitbox) in  (*Top right point of hitbox *)
-    let newp1 = {x=p2.x;y=p1.y} in
-    let newp2 = {x=p2.x + ch.range;y=p2.y} in
+    let newp1 = {x=(p1.x+p2.x)/2;y=p1.y} in
+    let newp2 = {x=p2.x;y=p2.y} in
     let attack_box = (newp1,newp2) in
     if collide attack_box ch2.hitbox then (*If the attack hits*)
       (get_hit ch2 10;
@@ -283,10 +283,10 @@ let process_attack (a: attack) (i: int) : unit =
     (* Get a box that has width range and that is adjacent to the left of the character *)
     let p1 = (fst ch.hitbox) in (*Bottom left point of hitbox *)
     let p2 = (snd ch.hitbox) in  (*Top right point of hitbox *)
-    let newp1 = {x=p1.x - (ch.range/2);
-                 y=p1.y + ((p2.y - p1.y)/3)} in
-    let newp2 = {x=p2.x + (ch.range/2);
-                 y=p2.y + (ch.range/2)} in
+    let newp1 = {x=p1.x;
+                 y=p1.y + (2*((p2.y - p1.y)/3))} in
+    let newp2 = {x=p2.x;
+                 y=p2.y} in
     let third = (newp2.x - newp1.x)/3 in
     let b1p1 = {x=newp1.x;y=newp1.y} in
     let b1p2 = {x=newp1.x + third;y=newp2.y} in
@@ -382,9 +382,9 @@ let process_attack (a: attack) (i: int) : unit =
     (* Get a box that has width range and that is adjacent to the left of the character *)
     let p1 = (fst ch.hitbox) in (*Bottom left point of hitbox *)
     let p2 = (snd ch.hitbox) in  (*Top right point of hitbox *)
-    let newp1 = {x=p1.x - (ch.range/2);
-                 y=p1.y - (ch.range/2)} in
-    let newp2 = {x=p2.x + (ch.range/2);
+    let newp1 = {x=p1.x;
+                 y=p1.y} in
+    let newp2 = {x=p2.x;
                  y=p1.y + ((p2.y - p1.y)/3)} in
     let attack_box = (newp1,newp2) in
     if collide attack_box ch2.hitbox then (*If the attack hits*)
