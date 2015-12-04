@@ -371,6 +371,7 @@ let draw_characters (c1,c2) =
 
 let draw_end winner = 
   let col = foreground in
+  blasts := [];
   set_color white;
   draw_string_with_center "GAME!" (stagew/2, stageh/2 + 20);
   moveto (stagew/2) (stageh/2 - 20);
