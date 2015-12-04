@@ -1,7 +1,7 @@
 open Graphics
 open Character
-(**ai attack off stage, down smash on ground out, gui methods for replay,countdown, mess with ranges
-   *)
+
+()
 
 type move = MLeft | MRight | MDown | MUp
 
@@ -143,26 +143,28 @@ let collide (r1: rect) (r2: rect) : bool =
 and processes their death if they are out of bounds. If a player loses all of their
 lives, the game ends. This returns unit. *)
 let checkfordeath ch =
-  let i = if (!c1)= ch then 1 else 2 in
+  if !continue then
+  (let i = if (!c1)= ch then 1 else 2 in
   if collide ({x=(-10000);y=800},{x=100000;y=1000000}) ch.hitbox then
     let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-    (Gui.start_blast x 600 true false i ; reset ch ; if ch.lives = 0 then( continue := false ; Gui.draw_end i )else ())
+    (Gui.start_blast x 600 true false i ;  if ch.lives = 1 then( continue := false ; gravitycounter := 0 ; ch.lives <- 0)else reset ch )
   else
     if collide ({x=(-100000);y=(-100000)},{x=100000;y=(-150)}) ch.hitbox then
       let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-      (Gui.start_blast x 0 true true i ; reset ch ; if ch.lives = 0 then( continue := false ; Gui.draw_end i ) else ())
+      (Gui.start_blast x 0 true true i ; if ch.lives = 1 then( continue := false ; gravitycounter := 0; ch.lives <- 0) else reset ch)
     else
       if collide ({x=(-10000);y=(-10000)},{x=(-400);y=10000}) ch.hitbox then
-        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; reset ch ; if ch.lives = 0 then ( continue := false ; Gui.draw_end i )else ())
+        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; if ch.lives = 1 then ( continue := false ; gravitycounter := 0; ch.lives <- 0)else reset ch)
     else
       if collide ({x=1400;y=(-10000)},{x=10000;y=100000}) ch.hitbox then
-        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; reset ch ; if ch.lives = 0 then ( continue := false ; Gui.draw_end i )else ())
+        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; if ch.lives = 1 then ( continue := false ; gravitycounter := 0; ch.lives <- 0)else reset ch)
       else
-        ()
+        ())
+  else ()
 
 (**[update ()] processes the change in position and velocity that occurs for each
 character at every frame. This takes into account gravity, stage collisions,
@@ -521,7 +523,11 @@ let rec tickprocessor () = (**need to call process attack*)
    newinputs := [] ;
    ignore(Thread.create (Gui.draw_characters) (!c1,!c2));
    Thread.delay 0.02 ;
-   if !continue then tickprocessor () else ()
+   if !continue  then tickprocessor () else
+     if !gravitycounter = 30 then
+       let i = if !c1.lives = 0 then 1 else 2 in
+       Gui.draw_end i
+     else tickprocessor ()
 
 (**[input_loop ()] continuously reads inputs from the keyboard and adds them to a
 list of inputs to be processed at the next frame. This returns unit.*)
