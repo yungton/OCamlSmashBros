@@ -1,7 +1,12 @@
 open Character
 
+<<<<<<< Updated upstream
 let stage_left = 150
 let stage_right = 850
+=======
+let stage_left = 150 
+let stage_right = 1150
+>>>>>>> Stashed changes
 
 type reaction = Move | Attack | Recover
 
@@ -14,8 +19,9 @@ let c1Position c1 ai =
 	if (fst c1.hitbox).x < (fst ai.hitbox).x then LeftOf else
 	if (fst c1.hitbox).x > (fst ai.hitbox).x then RightOf else Inside
 
-let chooseAttack c1 ai =
-	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in
+let chooseAttack c1 ai = 
+	
+	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in 
 
 	if (fst c1.hitbox).y > (fst ai.hitbox).y &&
 		(position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then
@@ -48,18 +54,44 @@ let recover c1 ai =
 	if (ai_pos.x <= stage_left) then "MR" else
 		"ML"
 
-let react c1 ai =
-	let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in
+
+
+let react c1 ai = 
+	(*negative when c1 is left of ai*)
+	let position_value_xl = (snd c1.hitbox).x - (fst ai.hitbox).x in 
+	(*positive when c1 is right of ai*)
+	let position_value_xr = (fst c1.hitbox).x - (snd ai.hitbox).x in
+	(*let position_value_ya = (fst c1.hitbox).y - (snd ai.hitbox).y in 
+	let position_value_yd = (snd c1.hitbox).y - (fst ai.hitbox).y in*) 
+	(*When characters are inside each other, xl and xr are opposite*)
+
+	(*let position_value_x = (fst c1.hitbox).x - (fst ai.hitbox).x in 
+>>>>>>> Stashed changes
 	let position_value_y = (fst c1.hitbox).y - (fst ai.hitbox).y in
 	let ai_pos = (fst ai.hitbox) in
 
 	if (ai_pos.x <= stage_left) || (ai_pos.x >= stage_right) then Recover else
 
+<<<<<<< Updated upstream
 	if ((position_value_x >= -(ai.range)) && (position_value_x <= ai.range))
 		|| ((position_value_y <= ai.range) && (position_value_y >= -(ai.range)))
 			&& (position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then
+=======
+	if ((position_value_xl >= -(ai.range)) && (position_value_xr <= ai.range))
+		|| ((position_value_y <= ai.range) && (position_value_y >= -(ai.range))) 
+			&& (position_value_x <= ai.range/2 && position_value_x >= -(ai.range/2)) then 
+>>>>>>> Stashed changes
 		Attack else
-			Move
+			Move*)
+	(*if (((position_value_xl >= -ai.range) && (position_value_xr < 0)) || ((position_value_xr >= -ai.range) && (position_value_xl > 0)))
+		|| (((position_value_ya <= ai.range/2) || (position_value_yd >= -ai.range/2)) 
+			&& (((position_value_xl <= -ai.range) && (position_value_xr < 0)) || ((position_value_xr >= -ai.range) && (position_value_xl > 0))))
+		then 
+		Attack else
+		Move*)
+	if (((position_value_xl >= -ai.range) && (position_value_xr < 0)) || ((position_value_xr <= ai.range) && (position_value_xl > 0))) then
+		Attack else
+		Move
 
 let execute_response_to_state c1 ai =
 
