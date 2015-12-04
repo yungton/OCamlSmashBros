@@ -55,21 +55,21 @@ let draw_line (x1,y1) (x2,y2) =
   lineto x2 y2;
   moveto xi yi
 
-let draw_string_with_center s (x,y) = 
+let draw_string_with_center s (x,y) =
   let (xi, yi) = current_point() in
   let (w,h) = text_size s in
   moveto (x-w/2) (y-h/2);
   draw_string s;
   moveto xi yi
 
-let draw_stage_top () = 
+let draw_stage_top () =
   let stage_width = size_x()-2*stage_inset in
-  let inner_diff = 25 in 
+  let inner_diff = 25 in
   let x1 = stage_inset and y1 = 100 in
   let x2 = x1 + stage_width and y2 = y1 in
   let x3 = x1 + 2*inner_diff and y3 = y1 + inner_diff in
   let x4 = x2 - 2*inner_diff and y4 = y3 in
-  let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in 
+  let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in
   set_color (color_from_hex "0x181818");
   fill_poly poly;
   set_color black;
@@ -77,7 +77,7 @@ let draw_stage_top () =
   (* draw_poly poly *)
 
 
-let draw_stage_base () = 
+let draw_stage_base () =
   set_color black;
   fill_rect stage_inset 0 (size_x()-2*stage_inset-1) 100
 
@@ -91,9 +91,9 @@ let draw_star () =
   fill_rect x y star_size star_size;
   set_color orig_col
 
-let draw_planet up col accent = 
+let draw_planet up col accent =
   set_color col;
-  let (y,a1,a2) = if up then 0-planet_offset,0,180 
+  let (y,a1,a2) = if up then 0-planet_offset,0,180
                   else size_y()+planet_offset,180,360 in
   fill_arc (size_x()/2) y (size_x()) 150 a1 a2
 
@@ -102,13 +102,13 @@ let draw_sun ()   = draw_planet true yellow yellow
 
 let draw_background () =
   let orig_col = foreground in
-  let col = color_from_hex bg_hex in 
+  let col = color_from_hex bg_hex in
   set_color col;
   fill_rect 0 0 (size_x()) (size_y());
   for i=0 to num_stars do draw_star() done;
   set_color orig_col
 
-let draw_status_box pnum col (x,y) c = 
+let draw_status_box pnum col (x,y) c =
   let orig_col = foreground in
   let (xi, xy) = current_point() in
   set_color col;
@@ -249,17 +249,17 @@ let draw_char c f1 (f2: 'a*'a -> 'a) col =
   let orig_col = foreground in
   set_color (color_from_hex bg_hex);
   let drawf = draw_for_state c in
-  let drawe = draw_for_attack !(f1 prev_attacks) in 
+  let drawe = draw_for_attack !(f1 prev_attacks) in
   draw_out_circle !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   drawe !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
   (* let cl = if c.stun > 0 then green else col in *)
   set_color col;
-  draw_out_circle (fst c.hitbox).x 
-        (fst c.hitbox).y 
+  draw_out_circle (fst c.hitbox).x
+        (fst c.hitbox).y
         (get_width c)
         (get_height c);
-  drawf (fst c.hitbox).x 
-        (fst c.hitbox).y 
+  drawf (fst c.hitbox).x
+        (fst c.hitbox).y
         (get_width c)
         (get_height c);
   set_color orig_col
@@ -274,7 +274,7 @@ let form_blast_poly (heights: int list) w =
 
 let rotate_poly_about_origin poly = Array.map (fun (x,y) -> (-y, x)) poly
 
-let rec rotate_n_times n poly = 
+let rec rotate_n_times n poly =
   if n = 0 then poly else rotate_n_times (n-1) (rotate_poly_about_origin poly)
 
 let shift_poly poly (dx, dy) =
@@ -282,7 +282,7 @@ let shift_poly poly (dx, dy) =
 
 let rec random_list n x = if n=0 then [] else Random.int(x)::random_list (n-1) x
 
-(** Draws a blast with a base centered at (x,y). 
+(** Draws a blast with a base centered at (x,y).
   * [vertical] = "the blast should be drawn tall, not wide"
   * [up]       = "the blast should be drawn up if veritcal and left otherwise"*)
 let draw_blast info erase =
@@ -306,7 +306,7 @@ let draw_blast info erase =
   | true, true -> (info.y, info.y)
   | true, false -> (info.y - h, info.y - mh)
   | false, true -> (info.y - h/2, info.y - mh/2)
-  | false, false -> (info.y - h/2, info.y - mh/2) in 
+  | false, false -> (info.y - h/2, info.y - mh/2) in
 
   let col = foreground in
   set_color (color_from_hex bg_hex);
@@ -325,11 +325,11 @@ let start_blast x y vert up player =
 let animate_blast () =
   let rec helper acc = function
   | [] -> acc
-  | b::bs -> 
+  | b::bs ->
     draw_blast b false;
     b.frames <- b.frames - 1;
     let new_acc = if b.frames = 0 then (draw_blast b true; acc) else b::acc in
-    helper new_acc bs 
+    helper new_acc bs
   in
 
   blasts := helper [] !blasts
@@ -344,10 +344,10 @@ let tick_countdown erase =
   fill_rect (stagew/2 - 15) (stageh/2 - 15) 30 30;
   set_color yellow;
   (if erase then ()
-    else 
-      let s = if (!counter > 1) 
+    else
+      let s = if (!counter > 1)
               then string_of_int ((!counter/60) + 1)
-              else "GO!" in 
+              else "GO!" in
       draw_string_with_center s (stagew/2, stageh/2));
   counter := !counter - 1;
   set_color col
@@ -369,7 +369,8 @@ let draw_characters (c1,c2) =
   if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
 
-let draw_end winner = 
+let draw_end winner =
+  let winner = if winner = 1 then 2 else 1 in
   let col = foreground in
   blasts := [];
   set_color white;
@@ -381,13 +382,13 @@ let draw_end winner =
   draw_string_with_center "Press Y for replay, N for exit" (stagew/2, stageh/2 - 20);
   set_color col
 
-let draw (c1,c2) = 
+let draw (c1,c2) =
   draw_background();
   draw_stage();
   draw_characters (c1,c2);
   draw_status_box 1 red (220,10) c1;
   draw_status_box 2 blue ((size_x()-320),10) c2
 
-let setup_window () = 
-  open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
+let setup_window () =
+  open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh));
   set_window_title "OCaml Smash Bros";

@@ -67,7 +67,7 @@ let create (g:guy) p =
   {
     hitbox = (p, {x=p.x+atts.width; y = p.y+atts.height});
     percent = 0;
-    stun = 3; (* might want to have them start stunned for a 3..2..1.. thing *)
+    stun = 180; (* might want to have them start stunned for a 3..2..1.. thing *)
     air = false;
     velocity = {x = 0;y = 0};
     jumps = 2;
@@ -89,8 +89,7 @@ let stop_attack c = c.current_attack <- None
 
 let stun c time = c.stun <- time
 
-let get_hit c dmg = c.percent <- c.percent + dmg;
-                    set_jumps c 1
+let get_hit c dmg = c.percent <- c.percent + dmg
 
 let change_velocity c v = c.velocity <- v
 

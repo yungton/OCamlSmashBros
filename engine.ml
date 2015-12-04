@@ -148,19 +148,19 @@ let checkfordeath ch =
     let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-    (Gui.start_blast x 600 true false i ; reset ch ; if ch.lives = 0 then continue := false else ())
+    (Gui.start_blast x 600 true false i ; reset ch ; if ch.lives = 0 then( continue := false ; Gui.draw_end i )else ())
   else
     if collide ({x=(-100000);y=(-100000)},{x=100000;y=(-150)}) ch.hitbox then
       let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-      (Gui.start_blast x 0 true true i ; reset ch ; if ch.lives = 0 then continue := false else ())
+      (Gui.start_blast x 0 true true i ; reset ch ; if ch.lives = 0 then( continue := false ; Gui.draw_end i ) else ())
     else
       if collide ({x=(-10000);y=(-10000)},{x=(-400);y=10000}) ch.hitbox then
-        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; reset ch ; if ch.lives = 0 then continue := false else ())
+        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; reset ch ; if ch.lives = 0 then ( continue := false ; Gui.draw_end i )else ())
     else
       if collide ({x=1400;y=(-10000)},{x=10000;y=100000}) ch.hitbox then
-        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; reset ch ; if ch.lives = 0 then continue := false else ())
+        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; reset ch ; if ch.lives = 0 then ( continue := false ; Gui.draw_end i )else ())
       else
         ()
 
@@ -539,13 +539,13 @@ let rec start_engine () =
   continue := true ;
   let t = Thread.create input_loop () in
   Gui.setup_window();
-  Gui.draw (!c1,!c2); (**call 321 method from gui here.*)
+  Gui.draw (!c1,!c2);
+  Gui.start_countdown 3 ;(**call 321 method from gui here.*)
   Thread.join (Thread.create tickprocessor ()) ;
   Thread.join t ;
   replay ()
 
 and replay () =
-  Gui.draw_end 1 ;
   let newchar = read_key () in
   match newchar with
   | 'y' ->
