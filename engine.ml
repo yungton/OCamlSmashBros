@@ -545,7 +545,7 @@ let rec start_engine () =
   replay ()
 
 and replay () =
-  Gui.draw_end () ;
+  Gui.draw_end 1 ;
   let newchar = read_key () in
   match newchar with
   | 'y' ->

@@ -381,7 +381,6 @@ let draw_end winner =
   set_color col
 
 let draw (c1,c2) = 
-  start_countdown 3;
   draw_background();
   draw_stage();
   draw_characters (c1,c2);

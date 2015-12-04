@@ -67,7 +67,7 @@ let create (g:guy) p =
   {
     hitbox = (p, {x=p.x+atts.width; y = p.y+atts.height});
     percent = 0;
-    stun = 0; (* might want to have them start stunned for a 3..2..1.. thing *)
+    stun = 3; (* might want to have them start stunned for a 3..2..1.. thing *)
     air = false;
     velocity = {x = 0;y = 0};
     jumps = 2;
