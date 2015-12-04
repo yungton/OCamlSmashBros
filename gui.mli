@@ -32,4 +32,7 @@ val draw_characters : Character.t * Character.t -> unit
   * *)
 val start_blast : int -> int -> bool -> bool -> int -> unit
 
-val draw_end : unit -> unit
+val draw_end : int -> unit
+
+(** Starts a countdown in SECONDS *)
+val start_countdown : int -> unit

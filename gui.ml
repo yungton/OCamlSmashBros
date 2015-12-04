@@ -49,28 +49,18 @@ let color_from_hex hex_string =
 let p1_col = color_from_hex (p1_hex)
 let p2_col = color_from_hex (p2_hex)
 
-let copy_matrix m1 m2 =
-  for row=0 to (Array.length m1)-1 do
-    for col=0 to (Array.length m1.(0))-1 do
-      m1.(row).(col) <- m2.(row).(col)
-    done
-  done
-
 let draw_line (x1,y1) (x2,y2) =
   let (xi,yi) = current_point() in
   moveto x1 y1;
   lineto x2 y2;
   moveto xi yi
 
-let portion_of_og_stage x y w h =
-  let result = Array.make_matrix h w white in
-  for row = 0 to h-1 do
-    for col = 0 to w-1 do
-      result.(row).(col) <- og_stage.(row+y).(col+x)
-    done;
-  done;
-  make_image result
-
+let draw_string_with_center s (x,y) = 
+  let (xi, yi) = current_point() in
+  let (w,h) = text_size s in
+  moveto (x-w/2) (y-h/2);
+  draw_string s;
+  moveto xi yi
 
 let draw_stage_top () = 
   let stage_width = size_x()-2*stage_inset in
@@ -274,6 +264,24 @@ let draw_char c f1 (f2: 'a*'a -> 'a) col =
         (get_height c);
   set_color orig_col
 
+let form_blast_poly (heights: int list) w =
+  let dx = w / (List.length heights) in
+  let rec assign_x_to_height dx n = function
+    | []   -> []
+    | h::t -> (n*dx, h)::assign_x_to_height dx (n+1) t in
+  Array.of_list ((w,0)::(0,0)::
+                 (assign_x_to_height dx 0 heights @ [(w, List.hd heights)]))
+
+let rotate_poly_about_origin poly = Array.map (fun (x,y) -> (-y, x)) poly
+
+let rec rotate_n_times n poly = 
+  if n = 0 then poly else rotate_n_times (n-1) (rotate_poly_about_origin poly)
+
+let shift_poly poly (dx, dy) =
+  Array.map (fun (x,y) -> (x+dx, y+dy)) poly
+
+let rec random_list n x = if n=0 then [] else Random.int(x)::random_list (n-1) x
+
 (** Draws a blast with a base centered at (x,y). 
   * [vertical] = "the blast should be drawn tall, not wide"
   * [up]       = "the blast should be drawn up if veritcal and left otherwise"*)
@@ -326,9 +334,28 @@ let animate_blast () =
 
   blasts := helper [] !blasts
 
+let counter = ref 0
+
+let start_countdown s = counter := s*60
+
+let tick_countdown erase =
+  let col = foreground in
+  set_color (color_from_hex bg_hex);
+  fill_rect (stagew/2 - 15) (stageh/2 - 15) 30 30;
+  set_color yellow;
+  (if erase then ()
+    else 
+      let s = if (!counter > 1) 
+              then string_of_int ((!counter/60) + 1)
+              else "GO!" in 
+      draw_string_with_center s (stagew/2, stageh/2));
+  counter := !counter - 1;
+  set_color col
+
 let draw_characters (c1,c2) =
   incr count;
   draw_stage_top();
+  (if !counter > 0 then tick_countdown false else ());
   animate_blast ();
   draw_char c1 fst fst p1_col;
   draw_char c2 snd snd p2_col;
@@ -341,22 +368,25 @@ let draw_characters (c1,c2) =
 
   if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
 
-let draw_end () = 
-  let (xi, yi) = current_point() in
+
+let draw_end winner = 
   let col = foreground in
-  moveto (stagew/2) (stageh/2);
   set_color white;
-  draw_string "GAME";
-  set_color col;
-  moveto xi yi
+  draw_string_with_center "GAME!" (stagew/2, stageh/2 + 20);
+  moveto (stagew/2) (stageh/2 - 20);
+  draw_string_with_center ("Player " ^ (string_of_int winner) ^ " wins!")
+                          (stagew/2, stageh/2);
+  moveto (stagew/2) (stageh/2 - 40);
+  draw_string_with_center "Press Y for replay, N for exit" (stagew/2, stageh/2 - 20);
+  set_color col
 
 let draw (c1,c2) = 
+  start_countdown 3;
   draw_background();
   draw_stage();
   draw_characters (c1,c2);
   draw_status_box 1 red (220,10) c1;
   draw_status_box 2 blue ((size_x()-320),10) c2
-  (* copy_matrix og_stage (dump_image (get_image 0 0 stagew stageh)) *)
 
 let setup_window () = 
   open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh)); 
