@@ -1,4 +1,3 @@
-open Async.Std
 (** A character in OCaml Smash that is of type t. *)
 
 type point = {
