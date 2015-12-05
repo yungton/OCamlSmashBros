@@ -521,7 +521,7 @@ let rec tickprocessor () = (**need to call process attack*)
    let _ =
       ignore(Thread.create (fun x -> airesponse (); List.iter process x ; update ()) !newinputs) in
    newinputs := [] ;
-   ignore(Thread.create (Gui.draw_characters) (!c1,!c2));
+   ignore(Thread.create (Gui.draw) (!c1,!c2));
    Thread.delay 0.02 ;
    if !continue  then tickprocessor () else
      if !gravitycounter = 30 then
@@ -545,7 +545,6 @@ let rec start_engine () =
   continue := true ;
   let t = Thread.create input_loop () in
   Gui.setup_window();
-  Gui.draw (!c1,!c2);
   Gui.start_countdown 3 ;(**call 321 method from gui here.*)
   Thread.join (Thread.create tickprocessor ()) ;
   Thread.join t ;

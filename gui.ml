@@ -1,9 +1,12 @@
 open Graphics
 open Character
 
+(* Colors for the game *)
 let bg_hex = "0x0C3D6F"
 let p1_hex = "0xCC3300"
 let p2_hex = "0x339933"
+
+(* Properties *)
 let num_stars = 150
 let star_size = 1
 let planet_radius = 150
@@ -12,13 +15,15 @@ let stage_inset = 150
 let stagew = 1000
 let stageh = 600
 
-let count = ref 0
+let count = ref 0 (* A count of the number of frames that have been drawn for
+                   * refresing and animating purposes *)
 
-let og_stage = Array.make_matrix stageh stagew white
+(* Previous states for animating purposes *)
+let (pp1, pp2) = (ref {x=250;y=102}, ref {x=750;y=102}) (* previous postions *)
+let (pa1, pa2) = (ref None, ref None) (* previous attacks *)
 
-let prev_pos = (ref {x=250;y=102}, ref {x=750;y=102})
-let prev_attacks = (ref None, ref None)
-
+(** A type that encapsulates the needed information for drawing a blast. Frames
+  * is the number of remaining frames in this blast*)
 type blast_info = {
   x :      int;
   y :      int;
@@ -30,6 +35,7 @@ type blast_info = {
 
 let blast_length = 60
 
+(** Returns a new blast_info with the supplied data. *)
 let create_blast_info x y v u n= {
   x = x;
   y = y;
@@ -39,22 +45,33 @@ let create_blast_info x y v u n= {
   frames = blast_length;
 }
 
+(* Current blasts *)
 let blasts = ref []
 
+(** [color_from_hex s] returns a color with rbg components specified in the string
+  * Precondition: [s] must be of the format "0xHHHHHH" where H is any hex digit
+  * (the H can vary from digit to digit)
+  * *)
 let color_from_hex hex_string =
   let c = int_of_string hex_string in
   let r = c / 65536 and g = c / 256 mod 256 and b = c mod 256 in
   rgb r g b
 
+(* Colors of the players *)
 let p1_col = color_from_hex (p1_hex)
 let p2_col = color_from_hex (p2_hex)
 
+(** A conveinece function for drawing a line from (x1,y1) to (x2,y2) and returning
+  * then returning to the original point *)
 let draw_line (x1,y1) (x2,y2) =
   let (xi,yi) = current_point() in
   moveto x1 y1;
   lineto x2 y2;
   moveto xi yi
 
+(** A convenience function for drawing a string centered at a location instead of
+  * at an origin location.  
+  * *)
 let draw_string_with_center s (x,y) =
   let (xi, yi) = current_point() in
   let (w,h) = text_size s in
@@ -62,6 +79,7 @@ let draw_string_with_center s (x,y) =
   draw_string s;
   moveto xi yi
 
+(** Draws the polygon that is the top of the stage *)
 let draw_stage_top () =
   let stage_width = size_x()-2*stage_inset in
   let inner_diff = 25 in
@@ -72,17 +90,17 @@ let draw_stage_top () =
   let poly = [|(x1,y1);(x2,y2);(x4,y4);(x3,y3)|] in
   set_color (color_from_hex "0x181818");
   fill_poly poly;
-  set_color black;
-  set_line_width 5
-  (* draw_poly poly *)
+  set_color black
 
-
+(* Draws the rectangle that is the base of the stage *)
 let draw_stage_base () =
   set_color black;
   fill_rect stage_inset 0 (size_x()-2*stage_inset-1) 100
 
+(* Draws both the base and top of the stage *)
 let draw_stage () = draw_stage_top(); draw_stage_base()
 
+(* Draws a star at a random location in the window *)
 let draw_star () =
   let orig_col = foreground in
   let x = Random.int(size_x()) in
@@ -91,15 +109,21 @@ let draw_star () =
   fill_rect x y star_size star_size;
   set_color orig_col
 
-let draw_planet up col accent =
+(* This code is for drawing planets in the background. While we ultimately choose
+   not to include these effects, we decided to keep the code in case we wanted
+   to include them in the future *)
+(* let draw_planet up col accent =
   set_color col;
   let (y,a1,a2) = if up then 0-planet_offset,0,180
                   else size_y()+planet_offset,180,360 in
   fill_arc (size_x()/2) y (size_x()) 150 a1 a2
 
 let draw_earth () = draw_planet false blue blue
-let draw_sun ()   = draw_planet true yellow yellow
+let draw_sun ()   = draw_planet true yellow yellow *)
 
+(** 
+  * Paints the background of the window with the background color and draws stars
+  * *)
 let draw_background () =
   let orig_col = foreground in
   let col = color_from_hex bg_hex in
@@ -108,6 +132,12 @@ let draw_background () =
   for i=0 to num_stars do draw_star() done;
   set_color orig_col
 
+(**
+  * [draw_status_box pnum col (x,y) c] draws the status box for the character [c]
+  * who is player number [pnum] and color [col] with an origin at the point (x,y).
+  * A status box indicates the player number, the player's current percentage,
+  * and the player's lives remaining.
+  * *)
 let draw_status_box pnum col (x,y) c =
   let orig_col = foreground in
   let (xi, xy) = current_point() in
@@ -124,11 +154,17 @@ let draw_status_box pnum col (x,y) c =
   moveto xi xy;
   set_color orig_col
 
+(** [bound n lower upper] is [n] if n is between lower and upper, is [lower] if [n] 
+  * is less than [lower], and is [upper] if [n] is greater than [upper].
+  * In other words, the function bounds a number [n] between [lower] and [upper]
+  * *)
 let bound n l u = match n with
   | x when x > u -> u
   | x when x < l -> l
   | x -> x
 
+(** Draws a circle on the edge of the window that indicates where a player is
+  * offscreen. *)
 let draw_out_circle x y w h =
   let circle_radius = 10 in
   let circle_inset  = 20 in
@@ -141,6 +177,9 @@ let draw_out_circle x y w h =
   else if y > stageh then
   draw_circle (bound x circle_inset (stagew-circle_inset)) (stageh - circle_inset) circle_radius
 
+(* For each draw_x_guy function, the parameters are the same as those in fill_rect *)
+
+(* Draws a character in the neutral pose *)
 let draw_neutral_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -160,6 +199,7 @@ let draw_neutral_guy x y w h =
   draw_line (xb, ylb) (x, y);
   draw_line (xb, ylb) (x+w, y)
 
+(* Draws a character in the rightward attacking pose *)
 let draw_right_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -179,6 +219,7 @@ let draw_right_guy x y w h =
   draw_line (xb, ylb) (x, y);
   draw_line (xb, ylb) (x+w, y)
 
+(* Draws a character in the leftward attacking pose *)
 let draw_left_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -198,6 +239,7 @@ let draw_left_guy x y w h =
   draw_line (xb, ylb) (x, y);
   draw_line (xb, ylb) (x+w, y)
 
+(* Draws a character in the upward attacking pose *)
 let draw_up_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -217,6 +259,7 @@ let draw_up_guy x y w h =
   draw_line (xb, ylb) (x, y);
   draw_line (xb, ylb) (x+w, y)
 
+(* Draws a character in the downward attacking pose *)
 let draw_down_guy x y w h =
   let xb = x+w/2 in
   let yab = y+h-w and ylb = y+(min w (h/4)) in
@@ -236,6 +279,7 @@ let draw_down_guy x y w h =
   draw_line (xb, ylb) (x+10, y);
   draw_line (xb, ylb) (x+w-10, y)
 
+(* Returns the appropriate drawing function for a given attack *)
 let draw_for_attack = function
   | None       -> draw_neutral_guy
   | Some Up    -> draw_up_guy
@@ -243,16 +287,20 @@ let draw_for_attack = function
   | Some Left  -> draw_left_guy
   | Some Right -> draw_right_guy
 
+(* Returns the appropriate drawing function for a given character *)
 let draw_for_state c = draw_for_attack c.current_attack
 
-let draw_char c f1 (f2: 'a*'a -> 'a) col =
+(** [draw_char c i col] draws a character of state [c] with color [col].
+  * [i] indicates which player should be drawn. Supply 1 for player one and 2
+  * for player 2. *)
+let draw_char c i col =
   let orig_col = foreground in
   set_color (color_from_hex bg_hex);
+  let (pp, pa) = if i=1 then (pp1, pa1) else (pp2, pa2) in
   let drawf = draw_for_state c in
-  let drawe = draw_for_attack !(f1 prev_attacks) in
-  draw_out_circle !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
-  drawe !(f2 prev_pos).x !(f2 prev_pos).y (get_width c) (get_height c);
-  (* let cl = if c.stun > 0 then green else col in *)
+  let drawe = draw_for_attack !pa in
+  draw_out_circle !pp.x !pp.y (get_width c) (get_height c);
+  drawe !pp.x !pp.y (get_width c) (get_height c);
   set_color col;
   draw_out_circle (fst c.hitbox).x
         (fst c.hitbox).y
@@ -262,9 +310,16 @@ let draw_char c f1 (f2: 'a*'a -> 'a) col =
         (fst c.hitbox).y
         (get_width c)
         (get_height c);
+  pp := fst (c.hitbox);
+  pa := c.current_attack;
   set_color orig_col
 
-let form_blast_poly (heights: int list) w =
+(* These functions are for manipulating polygons for blasts that aren't just
+   rectangles. The polygons didn't look very good, so we chose to go with
+   rectangles, but it's possible that we could want to change that in the future
+   so we felt it was best to keep the following code commented out instead of
+   deleting it. *)
+(* let form_blast_poly (heights: int list) w =
   let dx = w / (List.length heights) in
   let rec assign_x_to_height dx n = function
     | []   -> []
@@ -280,7 +335,7 @@ let rec rotate_n_times n poly =
 let shift_poly poly (dx, dy) =
   Array.map (fun (x,y) -> (x+dx, y+dy)) poly
 
-let rec random_list n x = if n=0 then [] else Random.int(x)::random_list (n-1) x
+let rec random_list n x = if n=0 then [] else Random.int(x)::random_list (n-1) x *)
 
 (** Draws a blast with a base centered at (x,y).
   * [vertical] = "the blast should be drawn tall, not wide"
@@ -316,12 +371,16 @@ let draw_blast info erase =
   (if erase then () else fill_rect xr yr w h);
   set_color col
 
-
+(* see .mli
+ * Adds a new blast to the list of current blasts *)
 let start_blast x y vert up player =
   let info = create_blast_info x y vert up player in
   let old_blasts = !blasts in
   blasts := info :: old_blasts
 
+(** Creates a new randomly sized blast for each blast in the current blasts list
+  * then decreases the remaining frames for each one. Removes a blast from the 
+  * list and erases it if this was the last frame for the blast. *)
 let animate_blast () =
   let rec helper acc = function
   | [] -> acc
@@ -334,10 +393,15 @@ let animate_blast () =
 
   blasts := helper [] !blasts
 
+(* A counter for a countdown *)
 let counter = ref 0
 
+(* see .mli *)
 let start_countdown s = counter := s*60
 
+(** Draws a string corresponding to the number of seconds remaining on the countdown
+  * in the center of the screen. [erase] indicates if the function should just
+  * erase the string and not draw a new one*)
 let tick_countdown erase =
   let col = foreground in
   set_color (color_from_hex bg_hex);
@@ -352,23 +416,7 @@ let tick_countdown erase =
   counter := !counter - 1;
   set_color col
 
-let draw_characters (c1,c2) =
-  incr count;
-  draw_stage_top();
-  (if !counter > 0 then tick_countdown false else ());
-  animate_blast ();
-  draw_char c1 fst fst p1_col;
-  draw_char c2 snd snd p2_col;
-  fst prev_pos := fst (c1.hitbox);
-  snd prev_pos := fst (c2.hitbox);
-  fst prev_attacks := c1.current_attack;
-  snd prev_attacks := c2.current_attack;
-  draw_status_box 1 p1_col (220,10) c1;
-  draw_status_box 2 p2_col ((size_x()-320),10) c2;
-
-  if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
-
-
+(* see .mli *)
 let draw_end winner =
   let winner = if winner = 1 then 2 else 1 in
   let col = foreground in
@@ -382,13 +430,22 @@ let draw_end winner =
   draw_string_with_center "Press Y for replay, N for exit" (stagew/2, stageh/2 - 20);
   set_color col
 
+(* see .mli *)
 let draw (c1,c2) =
-  draw_background();
-  draw_stage();
-  draw_characters (c1,c2);
-  draw_status_box 1 red (220,10) c1;
-  draw_status_box 2 blue ((size_x()-320),10) c2
+  incr count;
+  draw_stage_top();
+  (if !counter > 0 then tick_countdown false else ());
+  animate_blast ();
+  draw_char c1 1 p1_col;
+  draw_char c2 2 p2_col;
+  draw_status_box 1 p1_col (220,10) c1;
+  draw_status_box 2 p2_col ((size_x()-320),10) c2;
 
+  if !count mod 120 = 0 then (draw_background(); draw_stage()) else ()
+
+(* see .mli *)
 let setup_window () =
   open_graph (" " ^ (string_of_int stagew) ^ "x" ^ (string_of_int stageh));
   set_window_title "OCaml Smash Bros";
+  draw_background();
+  draw_stage()

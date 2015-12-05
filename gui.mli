@@ -1,9 +1,11 @@
+(** [setup_window() opens the game window, appropriately titles it, and draws
+  * the background and the stage. *)
 val setup_window : unit -> unit
 
-(*Draws every character and the stage and background*)
+(** [draw (c1,c2)] draws all the needed elements to the screen: the supplied
+  * characters, the background, the stage, any animations, and status boxes. 
+  * *)
 val draw : Character.t * Character.t -> unit 
-
-val draw_characters : Character.t * Character.t -> unit 
 
 (** 
   * [start_blast x y vert up player] begins a blast animation with a base centered 
@@ -32,7 +34,12 @@ val draw_characters : Character.t * Character.t -> unit
   * *)
 val start_blast : int -> int -> bool -> bool -> int -> unit
 
+(** [draw_end winner] draws the end of game message says that player number 
+  * [winner] has won the game with instructions for playing again or exiting. 
+  * *)
 val draw_end : int -> unit
 
-(** Starts a countdown in SECONDS *)
+(** [start_countdown sec] starts a countdown in the middle of the screen that
+  * that decreases once per second in the format "sec, sec-1, ..., 1, GO!"
+  * *)
 val start_countdown : int -> unit
