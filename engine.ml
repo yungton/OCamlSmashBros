@@ -149,19 +149,27 @@ let checkfordeath ch =
     let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-    (Gui.start_blast x 600 true false i ;  if ch.lives = 1 then( continue := false ; gravitycounter := 0 ; ch.lives <- 0)else reset ch )
+    (Gui.start_blast x 600 true false i ;
+    if ch.lives = 1 then( continue := false ;
+    gravitycounter := 0 ; ch.lives <- 0)else reset ch )
   else
     if collide ({x=(-100000);y=(-100000)},{x=100000;y=(-150)}) ch.hitbox then
       let x = if (fst ch.hitbox).x > 1000 then 1000 else
               if (fst ch.hitbox).x < 0 then 0 else
               (fst ch.hitbox).x in
-      (Gui.start_blast x 0 true true i ; if ch.lives = 1 then( continue := false ; gravitycounter := 0; ch.lives <- 0) else reset ch)
+      (Gui.start_blast x 0 true true i ;
+      if ch.lives = 1 then( continue := false ;
+      gravitycounter := 0; ch.lives <- 0) else reset ch)
     else
       if collide ({x=(-10000);y=(-10000)},{x=(-400);y=10000}) ch.hitbox then
-        (Gui.start_blast 0 (fst ch.hitbox).y false true i ; if ch.lives = 1 then ( continue := false ; gravitycounter := 0; ch.lives <- 0)else reset ch)
+        (Gui.start_blast 0 (fst ch.hitbox).y false true i ;
+        if ch.lives = 1 then ( continue := false ;
+        gravitycounter := 0; ch.lives <- 0)else reset ch)
     else
       if collide ({x=1400;y=(-10000)},{x=10000;y=100000}) ch.hitbox then
-        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ; if ch.lives = 1 then ( continue := false ; gravitycounter := 0; ch.lives <- 0)else reset ch)
+        (Gui.start_blast 1000 (fst ch.hitbox).y false false i ;
+        if ch.lives = 1 then ( continue := false ;
+        gravitycounter := 0; ch.lives <- 0)else reset ch)
       else
         ())
   else ()
@@ -487,7 +495,7 @@ let process_move (m: move) (i: int) : unit =
 state and processes the attacks and moves for player 2. This is done by calling a
 function in the Ai module. This returns unit. *)
 let airesponse () =
-  if !aicounter mod 5 = 0 then
+  if !aicounter mod 7 = 0 then
     let r = Ai.execute_response_to_state (!c1) (!c2) in
     match r with
     | "ML" -> process_move MLeft 1
